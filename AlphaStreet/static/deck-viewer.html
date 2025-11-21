@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deck Viewer - TMT Bot</title>
+    <meta name="description" content="Interactive deck viewer with integrated TMT Bot summaries">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'anthropic-ivory': '#F8F1E4',
+                        'anthropic-slate': '#101010',
+                        'anthropic-cloud': '#99918D',
+                        'anthropic-cloud-medium': '#777066',
+                        'anthropic-cloud-dark': '#5A5449',
+                        'anthropic-cloud-light': '#E4E4DF',
+                        'anthropic-terracotta': '#CC786C',
+                        'anthropic-kraft': '#D4A37F'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F1E4;
+            overflow: hidden;
+        }
+        
+        .deck-panel {
+            width: 360px;
+            height: 100vh;
+            overflow-y: auto;
+            background: white;
+            border-right: 1px solid #E4E4DF;
+        }
+        
+        .deck-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .deck-panel::-webkit-scrollbar-track {
+            background: #E4E4DF;
+        }
+        
+        .deck-panel::-webkit-scrollbar-thumb {
+            background: #99918D;
+            border-radius: 3px;
+        }
+        
+        .report-viewer {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 40px;
+        }
+        
+        .report-viewer::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .report-viewer::-webkit-scrollbar-track {
+            background: #E4E4DF;
+        }
+        
+        .report-viewer::-webkit-scrollbar-thumb {
+            background: #99918D;
+            border-radius: 4px;
+        }
+        
+        .deck-card {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .deck-card:hover {
+            background: #f9f9f7;
+            border-left-color: #D4A37F;
+        }
+        
+        .deck-card.active {
+            background: #F8F1E4;
+            border-left-color: #CC786C;
+        }
+        
+        .bot-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: linear-gradient(135deg, #F8F1E4 0%, #EBDBBC 100%);
+        }
+        
+        .bot-panel.open {
+            max-height: 400px;
+        }
+        
+        .summary-option {
+            transition: all 0.2s ease;
+        }
+        
+        .summary-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(204, 120, 108, 0.2);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <div class="flex h-screen">
+        <!-- Left Panel: Deck Navigation -->
+        <div class="deck-panel">
+            <!-- TMT Bot Button -->
+            <div class="p-4 border-b border-anthropic-cloud-light bg-white sticky top-0 z-10">
+                <button onclick="showSummaryMode()" 
+                        class="w-full bg-gradient-to-r from-anthropic-terracotta to-anthropic-kraft text-white px-4 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center space-x-2"
+                        data-testid="button-tmt-bot">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                    <span>TMT BOT</span>
+                </button>
+            </div>
+            
+            <!-- Deck Header -->
+            <div class="p-4 border-b border-anthropic-cloud-light">
+                <div class="text-center">
+                    <div class="inline-flex items-center space-x-2 mb-2">
+                        <span class="text-2xl" id="deck-icon">📊</span>
+                        <svg width="40" height="40" viewBox="0 0 120 120" class="text-anthropic-slate opacity-60">
+                            <g stroke="currentColor" fill="currentColor" stroke-width="2">
+                                <circle cx="60" cy="60" r="6"/>
+                                <circle cx="30" cy="30" r="4" opacity="0.7"/>
+                                <circle cx="90" cy="30" r="4" opacity="0.7"/>
+                                <circle cx="90" cy="90" r="4" opacity="0.7"/>
+                                <circle cx="30" cy="90" r="4" opacity="0.7"/>
+                                <line x1="60" y1="60" x2="30" y2="30" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="60" y1="60" x2="90" y2="30" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="60" y1="60" x2="90" y2="90" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="60" y1="60" x2="30" y2="90" stroke-width="1.5" opacity="0.5"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-bold text-anthropic-slate" id="deck-title">Loading...</h2>
+                    <p class="text-xs text-anthropic-cloud-medium" id="deck-subtitle"></p>
+                </div>
+            </div>
+            
+            <!-- Report Cards -->
+            <div id="deck-cards-container" class="pb-4">
+                <!-- Cards will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Right Panel: Report Viewer -->
+        <div class="report-viewer">
+            <div class="max-w-4xl mx-auto">
+                <!-- Report View -->
+                <div id="report-view">
+                    <!-- Report Header -->
+                    <div class="bg-white rounded-2xl p-8 shadow-sm mb-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h1 class="text-3xl font-bold text-anthropic-slate mb-2" id="report-title">Select a report from the deck</h1>
+                                <p class="text-anthropic-cloud-medium" id="report-date"></p>
+                            </div>
+                            <button onclick="goBack()" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full" id="report-sector"></span>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full" id="report-region"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Report Content -->
+                    <div class="bg-white rounded-2xl p-8 shadow-sm">
+                        <div id="report-content" class="prose max-w-none text-anthropic-slate">
+                            <p class="text-anthropic-cloud-medium">Click on a report card to view its content, or use TMT BOT to get quick AI summaries.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Summary View (shown when TMT BOT is clicked) -->
+                <div id="summary-view" class="hidden">
+                    <div class="bg-white rounded-2xl p-8 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h1 class="text-3xl font-bold text-anthropic-slate mb-2">TMT BOT Summary</h1>
+                                <p class="text-anthropic-cloud-medium">Choose your preferred summary length</p>
+                            </div>
+                            <button onclick="showReportMode()" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Summary Options -->
+                        <div class="space-y-4">
+                            <button onclick="generateSummary('30s')" 
+                                    class="summary-option w-full bg-gradient-to-r from-anthropic-terracotta to-anthropic-kraft text-white px-6 py-4 rounded-xl font-semibold hover:shadow-lg transition-all text-left"
+                                    data-testid="button-summary-30s">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-lg">⚡ 30-Second Brief</span>
+                                    <span class="text-sm opacity-90">Quick scan</span>
+                                </div>
+                            </button>
+                            <button onclick="generateSummary('1min')" 
+                                    class="summary-option w-full bg-gradient-to-r from-anthropic-kraft to-amber-400 text-white px-6 py-4 rounded-xl font-semibold hover:shadow-lg transition-all text-left"
+                                    data-testid="button-summary-1min">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-lg">📊 1-Minute Overview</span>
+                                    <span class="text-sm opacity-90">Key points</span>
+                                </div>
+                            </button>
+                            <button onclick="generateSummary('2min')" 
+                                    class="summary-option w-full bg-gradient-to-r from-amber-500 to-orange-400 text-white px-6 py-4 rounded-xl font-semibold hover:shadow-lg transition-all text-left"
+                                    data-testid="button-summary-2min">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-lg">📈 2-Minute Deep Dive</span>
+                                    <span class="text-sm opacity-90">Detailed analysis</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Summary Result Display -->
+                    <div id="summary-result" class="bg-white rounded-2xl p-8 shadow-sm hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-anthropic-slate" id="summary-result-label"></h2>
+                            <button onclick="clearSummaryResult()" class="text-anthropic-cloud-medium hover:text-anthropic-slate">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="summary-result-content" class="prose max-w-none text-anthropic-slate"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentReports = [];
+        let currentReportId = null;
+        let summaryCache = {};
+        
+        // Parse URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                sector: params.get('sector') || 'tmt',
+                region: params.get('region') || 'us',
+                reportId: params.get('report')
+            };
+        }
+        
+        // Update URL without reload
+        function updateUrl(reportId) {
+            const params = getUrlParams();
+            const newUrl = `${window.location.pathname}?sector=${params.sector}&region=${params.region}&report=${reportId}`;
+            history.pushState({}, '', newUrl);
+        }
+        
+        // View mode switching
+        function showSummaryMode() {
+            document.getElementById('report-view').classList.add('hidden');
+            document.getElementById('summary-view').classList.remove('hidden');
+        }
+        
+        function showReportMode() {
+            document.getElementById('summary-view').classList.add('hidden');
+            document.getElementById('report-view').classList.remove('hidden');
+            clearSummaryResult();
+        }
+        
+        function clearSummaryResult() {
+            document.getElementById('summary-result').classList.add('hidden');
+            document.getElementById('summary-result-content').innerHTML = '';
+        }
+        
+        // Generate AI summary (mock version with placeholder content)
+        async function generateSummary(duration) {
+            const params = getUrlParams();
+            
+            // Use first report if none selected
+            const report = currentReportId 
+                ? currentReports.find(r => r.id == currentReportId)
+                : currentReports[0];
+                
+            if (!report) {
+                alert('No reports available');
+                return;
+            }
+            
+            const cacheKey = `${report.id}-${duration}`;
+            
+            // Check cache first
+            if (summaryCache[cacheKey]) {
+                displaySummaryResult(duration, summaryCache[cacheKey]);
+                return;
+            }
+            
+            const resultArea = document.getElementById('summary-result');
+            const content = document.getElementById('summary-result-content');
+            const label = document.getElementById('summary-result-label');
+            
+            resultArea.classList.remove('hidden');
+            label.textContent = `Generating ${duration} summary...`;
+            content.innerHTML = '<div class="flex items-center space-x-2"><div class="animate-spin rounded-full h-4 w-4 border-2 border-anthropic-terracotta border-t-transparent"></div><span class="text-anthropic-cloud-medium">TMT Bot is analyzing...</span></div>';
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // Generate mock summaries based on duration
+            let summary = '';
+            if (duration === '30s') {
+                summary = `🎯 ${report.title}\n\n${report.summary}\n\n✅ Quick takeaway: ${report.content.split('.')[0]}.`;
+            } else if (duration === '1min') {
+                const sentences = report.content.split('. ').slice(0, 3);
+                summary = `📊 ${report.title}\n\n${report.summary}\n\n📈 Key Highlights:\n• ${sentences.join('\n• ')}\n\n💡 Strategic implication: Market conditions favor strategic consolidation and technology-driven investments.`;
+            } else if (duration === '2min') {
+                summary = `📋 ${report.title}\n\n${report.summary}\n\n📈 Detailed Analysis:\n${report.content}\n\n💼 Investment Implications:\n• Valuations remain elevated in high-growth sectors\n• Strategic buyers showing increased appetite\n• Private equity capital remains abundant\n• Technology integration driving premium multiples\n\n🎯 Strategic Recommendations:\n• Monitor consolidation trends for entry opportunities\n• Focus on companies with strong technology moats\n• Consider ESG factors in valuation models\n• Track regulatory developments closely`;
+            }
+            
+            // Cache the result
+            summaryCache[cacheKey] = summary;
+            displaySummaryResult(duration, summary);
+        }
+        
+        function displaySummaryResult(duration, text) {
+            const label = document.getElementById('summary-result-label');
+            const content = document.getElementById('summary-result-content');
+            
+            const labels = {
+                '30s': '⚡ 30-SECOND BRIEF',
+                '1min': '📊 1-MINUTE OVERVIEW',
+                '2min': '📈 2-MINUTE DEEP DIVE'
+            };
+            
+            label.textContent = labels[duration] || 'SUMMARY';
+            content.innerHTML = `<p class="whitespace-pre-line">${text}</p>`;
+        }
+        
+        // Load deck data
+        async function loadDeck() {
+            const params = getUrlParams();
+            
+            // Update deck title
+            const sectorNames = {
+                'tmt': 'TMT',
+                'healthcare': 'Healthcare',
+                'energy': 'Energy',
+                'consumer': 'Consumer',
+                'industrial': 'Industrial'
+            };
+            
+            const regionNames = {
+                'us': '🇺🇸 US Market',
+                'europe': '🇪🇺 European Market'
+            };
+            
+            const sectorIcons = {
+                'tmt': '📊',
+                'healthcare': '⚕️',
+                'energy': '⚡',
+                'consumer': '🛍️',
+                'industrial': '🏭'
+            };
+            
+            document.getElementById('deck-icon').textContent = sectorIcons[params.sector] || '📊';
+            document.getElementById('deck-title').textContent = `${sectorNames[params.sector] || 'TMT'} DECK`;
+            document.getElementById('deck-subtitle').textContent = `${regionNames[params.region] || 'US Market'} Reports`;
+            
+            // Comprehensive mock data for all sectors and regions
+            const allReports = {
+                'tmt-us': [
+                    {id: 1, title: "Silicon Valley M&A Landscape Q4 2025", sector: "TMT", region: "US", summary: "Comprehensive analysis of M&A activity in Silicon Valley tech sector", content: "Silicon Valley continues to lead global M&A activity with $47B in deals during Q4 2025. Microsoft acquired AI startup DataVault for $2.8B (15x revenue multiple). Meta purchased VR company ImmerseTech for $1.9B. Private equity deployment reaches $31B in technology sector, focusing on profitable SaaS companies.", published_date: "2025-09-15"},
+                    {id: 2, title: "US Streaming Wars: Market Share Analysis", sector: "TMT", region: "US", summary: "Deep dive into US streaming market dynamics and content spending", content: "Netflix maintains leadership with 75M US subscribers. Disney+ strong presence with ad-supported tiers gaining 35% of sign-ups. Content spending hits $50B across platforms. Market consolidation expected.", published_date: "2025-09-12"},
+                    {id: 3, title: "5G Infrastructure Investment Tracker", sector: "TMT", region: "US", summary: "US telecom infrastructure investments and 5G rollout analysis", content: "Verizon leads with 200M coverage, investing $10.2B. T-Mobile's mid-band advantage drives 2.1M net adds. AT&T focuses on enterprise 5G with $8.5B investment.", published_date: "2025-09-10"}
+                ],
+                'tmt-europe': [
+                    {id: 11, title: "European Tech M&A Quarterly Brief", sector: "TMT", region: "Europe", summary: "Analysis of European technology M&A activity and valuations", content: "European tech M&A reaches €38B in Q3. SAP acquires French AI firm for €1.2B. Nordic fintech consolidation continues with 12 major deals. UK post-Brexit attracting cross-border investment.", published_date: "2025-09-14"},
+                    {id: 12, title: "EU 5G Deployment Status Report", sector: "TMT", region: "Europe", summary: "5G rollout progress across European markets", content: "Germany leads with 85% population coverage. Vodafone and Deutsche Telekom invest €15B combined. Open RAN adoption accelerates in Eastern Europe.", published_date: "2025-09-11"},
+                    {id: 13, title: "European Streaming Landscape 2025", sector: "TMT", region: "Europe", summary: "Competitive dynamics in European streaming market", content: "Netflix faces competition from local players. Canal+ and Sky dominate regional markets. European content regulations drive local production spend of €8B.", published_date: "2025-09-08"}
+                ],
+                'healthcare-us': [
+                    {id: 21, title: "US Biotech M&A Activity Report", sector: "Healthcare", region: "US", summary: "Analysis of biotech acquisition trends and valuations", content: "US biotech M&A hits $45B year-to-date. Pfizer acquires oncology startup for $3.2B. Gene therapy valuations reach new highs at 18-25x revenue. Rare disease focus drives premiums.", published_date: "2025-09-13"},
+                    {id: 22, title: "Medical Device Innovation Tracker", sector: "Healthcare", region: "US", summary: "Latest developments in US medical device sector", content: "AI-powered diagnostics attract $2.1B investment. Surgical robotics market grows 34% YoY. FDA approvals accelerate for digital therapeutics.", published_date: "2025-09-09"},
+                    {id: 23, title: "Pharma Pipeline & Deal Analysis", sector: "Healthcare", region: "US", summary: "Pharmaceutical R&D and licensing activity", content: "Big Pharma licensing deals total $12B this quarter. Obesity drug market expansion drives valuations. Biosimilars competition intensifies.", published_date: "2025-09-06"}
+                ],
+                'healthcare-europe': [
+                    {id: 31, title: "European Healthcare M&A Landscape", sector: "Healthcare", region: "Europe", summary: "Cross-border healthcare M&A trends in Europe", content: "European healthcare M&A reaches €28B. Novartis expands rare disease portfolio with €2.4B acquisition. UK biotech attracting global buyers.", published_date: "2025-09-12"},
+                    {id: 32, title: "EU MedTech Regulatory Update", sector: "Healthcare", region: "Europe", summary: "Impact of MDR regulations on device market", content: "MDR compliance drives consolidation. German medtech leads innovation with €4B investment. Digital health adoption accelerates post-pandemic.", published_date: "2025-09-07"},
+                    {id: 33, title: "European Pharma Investment Trends", sector: "Healthcare", region: "Europe", summary: "Pharmaceutical investment across European markets", content: "European pharma R&D spend reaches €42B annually. Vaccine development remains priority. Personalized medicine attracts venture capital.", published_date: "2025-09-04"}
+                ],
+                'energy-us': [
+                    {id: 41, title: "US Renewable Energy M&A Spotlight", sector: "Energy", region: "US", summary: "Clean energy acquisition activity and trends", content: "Renewable energy M&A hits $32B in 2025. Solar projects trade at 12-15x EBITDA. Utility-scale storage deals surge. IRA incentives drive activity.", published_date: "2025-09-11"},
+                    {id: 42, title: "Oil & Gas Consolidation Report", sector: "Energy", region: "US", summary: "Traditional energy sector M&A dynamics", content: "Shale consolidation continues with $18B in deals. Majors divest non-core assets. ESG focus drives carbon capture investments.", published_date: "2025-09-08"},
+                    {id: 43, title: "US Grid Modernization Investment", sector: "Energy", region: "US", summary: "Infrastructure spending and smart grid adoption", content: "Grid modernization investments reach $24B. Battery storage deployments triple YoY. Smart grid technology attracts PE capital.", published_date: "2025-09-05"}
+                ],
+                'energy-europe': [
+                    {id: 51, title: "European Renewable Energy Market", sector: "Energy", region: "Europe", summary: "Green energy transition and investment flows", content: "European renewable investment tops €45B. Offshore wind dominates with €22B deployed. Green hydrogen projects gain momentum.", published_date: "2025-09-10"},
+                    {id: 52, title: "EU Carbon Market Analysis", sector: "Energy", region: "Europe", summary: "ETS pricing and carbon credit trading dynamics", content: "EU ETS prices stabilize at €85/ton. Corporate carbon strategies drive demand. REPowerEU accelerates transition timelines.", published_date: "2025-09-06"},
+                    {id: 53, title: "European Energy Security Report", sector: "Energy", region: "Europe", summary: "Energy independence and supply diversification", content: "LNG import capacity expands by 40%. Nuclear renaissance discussion gains traction. Energy storage becomes strategic priority.", published_date: "2025-09-03"}
+                ],
+                'consumer-us': [
+                    {id: 61, title: "US Retail M&A Quarterly Update", sector: "Consumer", region: "US", summary: "Retail sector consolidation and D2C trends", content: "Retail M&A reaches $15B in Q3. PE firms acquire heritage brands for digital transformation. D2C valuations normalize to 8-12x revenue.", published_date: "2025-09-09"},
+                    {id: 62, title: "CPG Brand Acquisition Trends", sector: "Consumer", region: "US", summary: "Consumer packaged goods M&A activity", content: "Major CPG companies invest $22B in natural/organic brands. Sustainability premium drives 20-30% valuation uplift. E-commerce capabilities key.", published_date: "2025-09-07"},
+                    {id: 63, title: "US Restaurant & Hospitality Deals", sector: "Consumer", region: "US", summary: "Food service and hospitality sector activity", content: "QSR chains valued at 16-20x EBITDA. Ghost kitchen investments total $2.1B. Franchise consolidation accelerates.", published_date: "2025-09-04"}
+                ],
+                'consumer-europe': [
+                    {id: 71, title: "European Luxury Goods Market", sector: "Consumer", region: "Europe", summary: "Luxury brand M&A and market dynamics", content: "European luxury M&A hits €12B. LVMH and Kering expand portfolios. Asian demand drives 45% of growth.", published_date: "2025-09-08"},
+                    {id: 72, title: "EU Retail Digital Transformation", sector: "Consumer", region: "Europe", summary: "E-commerce growth and omnichannel strategies", content: "European e-commerce grows 18% YoY. Click-and-collect adoption reaches 65%. Sustainability focus reshapes supply chains.", published_date: "2025-09-05"},
+                    {id: 73, title: "European Food & Beverage Trends", sector: "Consumer", region: "Europe", summary: "F&B innovation and investment activity", content: "Plant-based food market grows 32%. Premium spirits attract €3.2B investment. Functional beverages drive innovation.", published_date: "2025-09-02"}
+                ],
+                'industrial-us': [
+                    {id: 81, title: "US Manufacturing M&A Overview", sector: "Industrial", region: "US", summary: "Industrial sector consolidation trends", content: "Industrial M&A totals $28B in 2025. Automation technology drives premiums. Reshoring trend benefits US manufacturers.", published_date: "2025-09-10"},
+                    {id: 82, title: "Aerospace & Defense Deals Update", sector: "Industrial", region: "US", summary: "A&D sector investment and consolidation", content: "Defense spending increases drive $12B in deals. Space tech valuations soar. Supply chain resilience investments surge.", published_date: "2025-09-06"},
+                    {id: 83, title: "US Infrastructure Investment Report", sector: "Industrial", region: "US", summary: "Construction and infrastructure spending analysis", content: "Infrastructure bill drives $67B in projects. Engineering firms trade at 14-18x EBITDA. Materials sector sees consolidation.", published_date: "2025-09-03"}
+                ],
+                'industrial-europe': [
+                    {id: 91, title: "European Industrial Automation", sector: "Industrial", region: "Europe", summary: "Industry 4.0 adoption and investment", content: "European automation spending reaches €34B. German engineering leads innovation. Robotics adoption accelerates in Eastern Europe.", published_date: "2025-09-09"},
+                    {id: 92, title: "EU Green Manufacturing Initiatives", sector: "Industrial", region: "Europe", summary: "Sustainable manufacturing investment trends", content: "Green manufacturing investments top €25B. Circular economy models gain adoption. Carbon-neutral production becomes standard.", published_date: "2025-09-05"},
+                    {id: 93, title: "European Aerospace Market Analysis", sector: "Industrial", region: "Europe", summary: "Commercial and defense aerospace trends", content: "Airbus backlog supports supply chain investments. Electric aircraft development accelerates. Defense modernization drives €8B spending.", published_date: "2025-09-01"}
+                ]
+            };
+            
+            const key = `${params.sector}-${params.region}`;
+            currentReports = allReports[key] || allReports['tmt-us'];
+            
+            renderDeckCards();
+            
+            // Load initial report if specified in URL
+            if (params.reportId) {
+                loadReport(params.reportId);
+            }
+        }
+        
+        // Render deck cards
+        function renderDeckCards() {
+            const container = document.getElementById('deck-cards-container');
+            container.innerHTML = currentReports.map(report => `
+                <div class="deck-card px-4 py-3 cursor-pointer ${currentReportId == report.id ? 'active' : ''}" 
+                     onclick="loadReport(${report.id})"
+                     data-testid="deck-card-${report.id}">
+                    <h3 class="text-sm font-semibold text-anthropic-slate mb-1 leading-snug">${report.title}</h3>
+                    <p class="text-xs text-anthropic-cloud-medium">${new Date(report.published_date).toLocaleDateString()}</p>
+                </div>
+            `).join('');
+        }
+        
+        // Load report
+        function loadReport(reportId) {
+            currentReportId = reportId;
+            const report = currentReports.find(r => r.id == reportId);
+            
+            if (!report) return;
+            
+            // Update active state in deck
+            renderDeckCards();
+            
+            // Update URL
+            updateUrl(reportId);
+            
+            // Display report
+            document.getElementById('report-title').textContent = report.title;
+            document.getElementById('report-date').textContent = new Date(report.published_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
+            document.getElementById('report-sector').textContent = report.sector;
+            document.getElementById('report-region').textContent = report.region;
+            document.getElementById('report-content').innerHTML = `
+                <h2 class="text-xl font-bold mb-4">Executive Summary</h2>
+                <p class="mb-4">${report.summary}</p>
+                <h2 class="text-xl font-bold mb-4">Full Analysis</h2>
+                <p class="whitespace-pre-line">${report.content}</p>
+            `;
+            
+            // Scroll to top of report viewer
+            document.querySelector('.report-viewer').scrollTop = 0;
+        }
+        
+        // Go back to dashboard
+        function goBack() {
+            window.location.href = '/static/dashboard.html';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDeck();
+        });
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', () => {
+            const params = getUrlParams();
+            if (params.reportId) {
+                loadReport(params.reportId);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Sector Reports - TMT Bot</title>
+    <meta name="description" content="Industrial sector reports and market intelligence covering manufacturing, infrastructure, and heavy industry.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'anthropic-ivory': '#F8F1E4',
+                        'anthropic-slate': '#101010',
+                        'anthropic-cloud': '#99918D',
+                        'anthropic-cloud-medium': '#777066',
+                        'anthropic-cloud-dark': '#5A5449',
+                        'anthropic-cloud-light': '#E4E4DF'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F1E4;
+        }
+        .shadow-anthropic {
+            box-shadow: 0 15px 40px rgba(16, 16, 16, 0.15);
+        }
+        .shadow-anthropic-hover {
+            box-shadow: 0 25px 60px rgba(16, 16, 16, 0.25);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-anthropic-slate">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-anthropic sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <a href="/static/index.html" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-anthropic-slate rounded-xl flex items-center justify-center">
+                            <svg class="text-white w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-bold text-anthropic-slate" data-testid="text-logo">TMT BOT</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/static/dashboard.html" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors font-medium" data-testid="link-dashboard">Dashboard</a>
+                    <a href="/static/reports.html" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors font-medium" data-testid="link-reports">All Reports</a>
+                    <span class="text-anthropic-cloud-medium font-medium" data-testid="text-welcome" id="welcome-text">Welcome, User</span>
+                    <button onclick="logout()" class="bg-white border border-anthropic-cloud-light text-anthropic-slate px-6 py-2 rounded-lg hover:shadow-anthropic transition-all font-medium" data-testid="button-logout">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="py-16 px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-block p-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-anthropic mb-8">
+                <svg width="80" height="80" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80 mx-auto">
+                    <!-- Volcanic formation -->
+                    <g stroke="currentColor" fill="none" stroke-width="2">
+                        <!-- Volcano mountain shape -->
+                        <path d="M20 90 L45 50 L60 30 L75 50 L100 90 Z" fill="currentColor" opacity="0.15"/>
+                        <path d="M20 90 L45 50 L60 30 L75 50 L100 90"/>
+                        
+                        <!-- Crater at peak -->
+                        <ellipse cx="60" cy="30" rx="8" ry="3" fill="currentColor" opacity="0.3"/>
+                        
+                        <!-- Lava/magma glow -->
+                        <path d="M55 32 Q60 28 65 32" stroke-width="1" opacity="0.7"/>
+                        <circle cx="58" cy="31" r="1" fill="currentColor" opacity="0.8"/>
+                        <circle cx="62" cy="30" r="1" fill="currentColor" opacity="0.8"/>
+                        
+                        <!-- Rock layers/striations -->
+                        <path d="M25 80 Q60 75 95 80" stroke-width="1" opacity="0.4"/>
+                        <path d="M30 70 Q60 65 90 70" stroke-width="1" opacity="0.4"/>
+                        
+                        <!-- Heat/steam wisps -->
+                        <path d="M58 25 Q55 20 58 15" stroke-width="1" opacity="0.5"/>
+                        <path d="M62 25 Q65 20 62 15" stroke-width="1" opacity="0.5"/>
+                    </g>
+                </svg>
+            </div>
+            <h1 class="text-5xl lg:text-6xl font-bold text-anthropic-slate mb-6 tracking-tight" data-testid="text-industrial-title">
+                Industrial Sector Reports
+            </h1>
+            <p class="text-xl text-anthropic-cloud-medium font-regular max-w-3xl mx-auto leading-relaxed" data-testid="text-industrial-subtitle">
+                Manufacturing, infrastructure, and heavy industry market intelligence and analysis
+            </p>
+        </div>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="px-8 pb-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="reports-container">
+                <!-- Reports will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-auto m-4 shadow-anthropic">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl font-bold text-anthropic-slate" id="modal-title">Report Title</h2>
+                    <button onclick="closeModal()" class="text-anthropic-cloud hover:text-anthropic-slate transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modal-content" class="prose max-w-none">
+                    <!-- Report content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication helper
+        async function fetchWithAuth(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    credentials: 'include'
+                });
+                
+                if (response.status === 401) {
+                    window.location.href = '/api/login';
+                    return null;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return null;
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const user = await fetchWithAuth('/api/auth/user');
+            if (user) {
+                document.getElementById('welcome-text').textContent = `Welcome, ${user.name}`;
+            }
+        }
+
+        // Load Industrial reports
+        async function loadReports() {
+            const reports = await fetchWithAuth('/api/reports');
+            if (!reports) return;
+
+            // Filter for Industrial reports only
+            const industrialReports = reports.filter(report => report.sector === 'Industrial');
+            const container = document.getElementById('reports-container');
+            
+            if (industrialReports.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16">
+                        <p class="text-anthropic-cloud-medium text-lg">No Industrial reports available yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = industrialReports.map(report => `
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-anthropic hover:shadow-anthropic-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer" 
+                     onclick="openModal('${report.id}')" data-testid="report-card-${report.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">Industrial</span>
+                        <span class="text-anthropic-cloud-medium text-sm" data-testid="report-date-${report.id}">${new Date(report.published_date).toLocaleDateString()}</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-anthropic-slate mb-3 leading-tight" data-testid="report-title-${report.id}">${report.title}</h3>
+                    <p class="text-anthropic-cloud-medium mb-4 line-clamp-3" data-testid="report-summary-${report.id}">${report.summary}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-anthropic-cloud-medium font-medium">Click to read full report</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" class="text-anthropic-cloud">
+                            <path d="M9 6 L15 12 L9 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open report modal
+        async function openModal(reportId) {
+            const reports = await fetchWithAuth('/api/reports');
+            const report = reports?.find(r => r.id === parseInt(reportId));
+            
+            if (!report) return;
+            
+            document.getElementById('modal-title').textContent = report.title;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="text-anthropic-cloud-medium mb-4">
+                    <span class="font-semibold">Sector:</span> ${report.sector} | 
+                    <span class="font-semibold">Published:</span> ${new Date(report.published_date).toLocaleDateString()}
+                </div>
+                <div class="whitespace-pre-wrap text-anthropic-slate leading-relaxed">${report.content}</div>
+            `;
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+        }
+
+        // Logout function
+        function logout() {
+            window.location.href = '/api/logout';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('report-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'report-modal') {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const user = await fetchWithAuth('/api/auth/user');
+            if (!user) {
+                window.location.href = '/api/login';
+                return;
+            }
+            
+            // Load data
+            await Promise.all([
+                loadUserData(),
+                loadReports()
+            ]);
+        });
+    </script>
+</body>
+</html>

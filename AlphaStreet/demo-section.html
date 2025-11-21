@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive LLM Chat Demo - TMT Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Anthropic-inspired Color Palette */
+        :root {
+            --anthropic-manila: #F8F1E4;
+            --anthropic-kraft: #D4A37F;
+            --anthropic-terracotta: #CC786C;
+            --anthropic-slate: #2C2C2C;
+            --anthropic-cloud-dark: #6B6B6B;
+            --anthropic-cloud-medium: #8A8A8A;
+            --anthropic-cloud-light: #C5C5C5;
+        }
+
+        .text-anthropic-manila { color: var(--anthropic-manila); }
+        .text-anthropic-kraft { color: var(--anthropic-kraft); }
+        .text-anthropic-terracotta { color: var(--anthropic-terracotta); }
+        .text-anthropic-slate { color: var(--anthropic-slate); }
+        .text-anthropic-cloud-dark { color: var(--anthropic-cloud-dark); }
+        .text-anthropic-cloud-medium { color: var(--anthropic-cloud-medium); }
+        .text-anthropic-cloud-light { color: var(--anthropic-cloud-light); }
+        
+        .bg-anthropic-manila { background-color: var(--anthropic-manila); }
+        .bg-anthropic-kraft { background-color: var(--anthropic-kraft); }
+        .bg-anthropic-terracotta { background-color: var(--anthropic-terracotta); }
+        .bg-anthropic-slate { background-color: var(--anthropic-slate); }
+        .bg-anthropic-cloud-dark { background-color: var(--anthropic-cloud-dark); }
+        .bg-anthropic-cloud-medium { background-color: var(--anthropic-cloud-medium); }
+        .bg-anthropic-cloud-light { background-color: var(--anthropic-cloud-light); }
+
+        .border-anthropic-terracotta\/40 {
+            border-color: rgba(204, 120, 108, 0.4);
+        }
+
+        .group-hover\/frame\:border-anthropic-terracotta\/70:hover {
+            border-color: rgba(204, 120, 108, 0.7);
+        }
+
+        .bg-anthropic-kraft\/40 {
+            background-color: rgba(212, 163, 127, 0.4);
+        }
+
+        .group-hover\/frame\:bg-anthropic-kraft\/70:hover {
+            background-color: rgba(212, 163, 127, 0.7);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Use Case Demo Section -->
+    <section class="py-32 px-8" style="background-color: #F8F1E4;">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- Minimalist Demo with Decorative Elements -->
+            <div class="relative group/frame">
+                <!-- Subtle corner accents -->
+                <div class="absolute top-0 left-0 w-20 h-20 border-l-2 border-t-2 border-anthropic-terracotta/40 group-hover/frame:border-anthropic-terracotta/70 transition-all duration-300"></div>
+                <div class="absolute bottom-0 right-0 w-20 h-20 border-r-2 border-b-2 border-anthropic-terracotta/40 group-hover/frame:border-anthropic-terracotta/70 transition-all duration-300"></div>
+                
+                <!-- Center dot ornament top -->
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-anthropic-kraft/40 group-hover/frame:bg-anthropic-kraft/70 transition-all duration-300"></div>
+                </div>
+                
+                <!-- Center dot ornament bottom -->
+                <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-anthropic-kraft/40 group-hover/frame:bg-anthropic-kraft/70 transition-all duration-300"></div>
+                </div>
+
+                <!-- Demo Link Content -->
+                <div class="text-center py-24 px-8">
+                    <a href="/api/LLM_Chat_Demo" class="group inline-block">
+                        <div class="space-y-8">
+                            <!-- Main Title -->
+                            <h3 class="text-3xl font-light text-anthropic-slate tracking-tight group-hover:text-anthropic-terracotta transition-colors duration-300">
+                                Interactive LLM Chat Demo
+                            </h3>
+                            
+                            <!-- Subtitle -->
+                            <p class="text-base font-light text-anthropic-cloud-medium max-w-xl mx-auto leading-relaxed">
+                                Chat with our AI assistant about TMT sector insights, market analysis, and deal intelligence
+                            </p>
+                            
+                            <!-- Arrow Indicator -->
+                            <div class="flex items-center justify-center space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2">
+                                <span class="text-sm font-light text-anthropic-terracotta tracking-wide">Try Demo</span>
+                                <svg class="w-5 h-5 text-anthropic-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

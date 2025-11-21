@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMT Europe Reports - TMT Bot</title>
+    <meta name="description" content="European Technology, Media & Telecommunications sector reports and market intelligence.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'anthropic-ivory': '#F8F1E4',
+                        'anthropic-slate': '#101010',
+                        'anthropic-cloud': '#99918D',
+                        'anthropic-cloud-medium': '#777066',
+                        'anthropic-cloud-dark': '#5A5449',
+                        'anthropic-cloud-light': '#E4E4DF'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F1E4;
+        }
+        .shadow-anthropic {
+            box-shadow: 0 15px 40px rgba(16, 16, 16, 0.15);
+        }
+        .shadow-anthropic-hover {
+            box-shadow: 0 25px 60px rgba(16, 16, 16, 0.25);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-anthropic-slate">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-anthropic sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <a href="/static/dashboard.html" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-anthropic-slate rounded-xl flex items-center justify-center">
+                            <svg class="text-white w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-bold text-anthropic-slate" data-testid="text-logo">TMT BOT</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/static/dashboard.html" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors font-medium" data-testid="link-dashboard">Dashboard</a>
+                    <a href="/static/chat.html" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors font-medium" data-testid="link-chat">TMT Bot</a>
+                    <div class="relative">
+                        <button onclick="toggleRegionDropdown()" class="flex items-center space-x-2 text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors font-medium">
+                            <span>🇪🇺 Europe</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" class="fill-current">
+                                <path d="M7 10l5 5 5-5z"/>
+                            </svg>
+                        </button>
+                        <div id="region-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-anthropic border border-anthropic-cloud-light hidden z-10">
+                            <a href="/static/sector-tmt-us.html" class="flex items-center space-x-2 px-4 py-3 hover:bg-gray-50 rounded-lg">
+                                <span>🇺🇸</span>
+                                <span>United States</span>
+                            </a>
+                        </div>
+                    </div>
+                    <span class="text-anthropic-cloud-medium font-medium" data-testid="text-welcome" id="welcome-text">Welcome, User</span>
+                    <button onclick="logout()" class="bg-white border border-anthropic-cloud-light text-anthropic-slate px-6 py-2 rounded-lg hover:shadow-anthropic transition-all font-medium" data-testid="button-logout">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="py-16 px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-block p-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-anthropic mb-8">
+                <div class="flex items-center justify-center space-x-3">
+                    <span class="text-4xl">🇪🇺</span>
+                    <svg width="60" height="60" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80">
+                        <g stroke="currentColor" fill="currentColor" stroke-width="2">
+                            <circle cx="60" cy="60" r="8" opacity="0.9"/>
+                            <circle cx="30" cy="30" r="5" opacity="0.7"/>
+                            <circle cx="90" cy="30" r="5" opacity="0.7"/>
+                            <circle cx="90" cy="90" r="5" opacity="0.7"/>
+                            <circle cx="30" cy="90" r="5" opacity="0.7"/>
+                            <circle cx="20" cy="60" r="4" opacity="0.6"/>
+                            <circle cx="100" cy="60" r="4" opacity="0.6"/>
+                            <circle cx="60" cy="20" r="4" opacity="0.6"/>
+                            <circle cx="60" cy="100" r="4" opacity="0.6"/>
+                            <line x1="60" y1="60" x2="30" y2="30" stroke-width="2" opacity="0.5"/>
+                            <line x1="60" y1="60" x2="90" y2="30" stroke-width="2" opacity="0.5"/>
+                            <line x1="60" y1="60" x2="90" y2="90" stroke-width="2" opacity="0.5"/>
+                            <line x1="60" y1="60" x2="30" y2="90" stroke-width="2" opacity="0.5"/>
+                            <line x1="60" y1="60" x2="20" y2="60" stroke-width="1.5" opacity="0.4"/>
+                            <line x1="60" y1="60" x2="100" y2="60" stroke-width="1.5" opacity="0.4"/>
+                            <line x1="60" y1="60" x2="60" y2="20" stroke-width="1.5" opacity="0.4"/>
+                            <line x1="60" y1="60" x2="60" y2="100" stroke-width="1.5" opacity="0.4"/>
+                            <circle cx="45" cy="45" r="2" opacity="0.8"/>
+                            <circle cx="75" cy="45" r="2" opacity="0.8"/>
+                            <circle cx="75" cy="75" r="2" opacity="0.8"/>
+                            <circle cx="45" cy="75" r="2" opacity="0.8"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-5xl lg:text-6xl font-bold text-anthropic-slate mb-6 tracking-tight" data-testid="text-tmt-europe-title">
+                TMT Europe Market Reports
+            </h1>
+            <p class="text-xl text-anthropic-cloud-medium font-regular max-w-3xl mx-auto leading-relaxed" data-testid="text-tmt-europe-subtitle">
+                European Technology, Media & Telecommunications market intelligence and analysis
+            </p>
+        </div>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="px-8 pb-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="reports-container">
+                <!-- Reports will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-auto m-4 shadow-anthropic">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl font-bold text-anthropic-slate" id="modal-title">Report Title</h2>
+                    <button onclick="closeModal()" class="text-anthropic-cloud hover:text-anthropic-slate transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modal-content" class="prose max-w-none">
+                    <!-- Report content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Authentication helper
+        async function fetchWithAuth(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    credentials: 'include'
+                });
+                
+                if (response.status === 401) {
+                    window.location.href = '/api/login';
+                    return null;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return null;
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const user = await fetchWithAuth('/api/auth/user');
+            if (user) {
+                document.getElementById('welcome-text').textContent = `Welcome, ${user.name}`;
+            }
+        }
+
+        // Load TMT Europe reports
+        async function loadReports() {
+            // Mock European TMT data
+            const mockReports = [
+                {
+                    id: 1,
+                    title: "EU Digital Services Act Impact on Tech Giants 2025",
+                    sector: "TMT",
+                    region: "Europe", 
+                    summary: "Analysis of DSA compliance costs and strategic responses by major tech platforms operating in Europe.",
+                    content: "The EU Digital Services Act has generated €12B in compliance costs across major platforms. Meta invested €2.8B in content moderation infrastructure, while Google allocated €3.1B for transparency reporting systems. TikTok faces potential €890M fine for algorithm transparency violations...",
+                    published_date: "2025-09-05"
+                },
+                {
+                    id: 2,
+                    title: "Nordic 5G Rollout: Market Leadership Analysis",
+                    sector: "TMT",
+                    region: "Europe",
+                    summary: "Comprehensive study of Scandinavian telecom operators' 5G deployment strategies and competitive advantages.",
+                    content: "Nordic region leads global 5G adoption with 78% population coverage. Telia's €4.2B investment in fiber-5G hybrid network provides competitive edge. Norwegian operators achieve 1.2Gbps average speeds through spectrum sharing agreements...",
+                    published_date: "2025-09-02"
+                },
+                {
+                    id: 3,
+                    title: "European Streaming Market: Local Content Quotas Impact",
+                    sector: "TMT", 
+                    region: "Europe",
+                    summary: "Assessment of how EU content quota requirements are reshaping streaming platform strategies and investments.",
+                    content: "Netflix allocates €8.5B for European original content production to meet 30% local quota requirement. Amazon Prime Video partners with 47 European production companies. Disney+ invests €2.1B in multilingual content across 15 European markets...",
+                    published_date: "2025-08-30"
+                }
+            ];
+
+            const container = document.getElementById('reports-container');
+            
+            container.innerHTML = mockReports.map(report => `
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-anthropic hover:shadow-anthropic-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer" 
+                     onclick="openModal('${report.id}')" data-testid="report-card-${report.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">TMT</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full">🇪🇺 Europe</span>
+                        </div>
+                        <span class="text-anthropic-cloud-medium text-sm" data-testid="report-date-${report.id}">${new Date(report.published_date).toLocaleDateString()}</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-anthropic-slate mb-3 leading-tight" data-testid="report-title-${report.id}">${report.title}</h3>
+                    <p class="text-anthropic-cloud-medium mb-4 line-clamp-3" data-testid="report-summary-${report.id}">${report.summary}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-anthropic-cloud-medium font-medium">Click to read full report</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" class="text-anthropic-cloud">
+                            <path d="M9 6 L15 12 L9 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            `).join('');
+
+            // Store mock data for modal
+            window.mockReports = mockReports;
+        }
+
+        // Open report modal
+        async function openModal(reportId) {
+            const report = window.mockReports?.find(r => r.id === parseInt(reportId));
+            
+            if (!report) return;
+            
+            document.getElementById('modal-title').textContent = report.title;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="text-anthropic-cloud-medium mb-4">
+                    <span class="font-semibold">Sector:</span> ${report.sector} | 
+                    <span class="font-semibold">Region:</span> ${report.region} |
+                    <span class="font-semibold">Published:</span> ${new Date(report.published_date).toLocaleDateString()}
+                </div>
+                <div class="whitespace-pre-wrap text-anthropic-slate leading-relaxed">${report.content}</div>
+            `;
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+        }
+
+        // Toggle region dropdown
+        function toggleRegionDropdown() {
+            const dropdown = document.getElementById('region-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('region-dropdown');
+            const button = e.target.closest('button');
+            if (!button || !button.onclick || button.onclick.toString().indexOf('toggleRegionDropdown') === -1) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Logout function
+        function logout() {
+            window.location.href = '/api/logout';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('report-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'report-modal') {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const user = await fetchWithAuth('/api/auth/user');
+            if (!user) {
+                window.location.href = '/api/login';
+                return;
+            }
+            
+            // Load data
+            await Promise.all([
+                loadUserData(),
+                loadReports()
+            ]);
+        });
+    </script>
+</body>
+</html>

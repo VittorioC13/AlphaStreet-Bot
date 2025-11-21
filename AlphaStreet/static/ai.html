@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - TMT Bot</title>
+    <meta name="description" content="Chat with TMT Bot's AI assistant for real-time analysis of deals, market trends, and investment insights across TMT, Healthcare, and Energy sectors.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'hsl(250, 100%, 69%)',
+                        secondary: 'hsl(199, 100%, 50%)',
+                        accent: 'hsl(266, 73%, 56%)',
+                        dark: 'hsl(210, 100%, 15%)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, hsl(250, 100%, 69%) 0%, hsl(266, 73%, 56%) 50%, hsl(199, 100%, 50%) 100%);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-container {
+            height: calc(100vh - 200px);
+        }
+        .message-bubble {
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .typing-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-100 fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/static/dashboard.html" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
+                            <svg class="text-white w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-semibold text-gray-900" data-testid="text-logo">TMT Bot</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/static/dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors" data-testid="link-dashboard">Dashboard</a>
+                    <a href="/static/reports.html" class="text-gray-600 hover:text-blue-600 transition-colors" data-testid="link-reports">Reports</a>
+                    <a href="/static/ai.html" class="text-blue-600 font-medium" data-testid="link-ai">AI Assistant</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-600" data-testid="text-welcome" id="welcome-text">Welcome, User</span>
+                    <button onclick="logout()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors" data-testid="button-logout">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-16 h-screen bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
+            <!-- Header -->
+            <div class="mb-6 animate-fade-in">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2" data-testid="text-ai-title">AI Deal Analysis Assistant</h1>
+                <p class="text-gray-600" data-testid="text-ai-subtitle">Ask me about any deal, market trend, or investment insight across TMT, Healthcare, and Energy sectors</p>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="bg-white rounded-2xl shadow-lg h-full max-h-[calc(100vh-200px)] flex flex-col">
+                <!-- Chat Messages -->
+                <div id="chat-messages" class="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4" data-testid="container-chat-messages">
+                    <!-- Welcome Message -->
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <div class="message-bubble bg-gray-100 rounded-2xl px-4 py-3">
+                            <p class="text-gray-800" data-testid="text-welcome-message">
+                                Hi! I'm your AI assistant for deal analysis and market intelligence. I can help you with:
+                            </p>
+                            <ul class="mt-2 text-sm text-gray-600 space-y-1">
+                                <li>• Recent M&A transactions and valuations</li>
+                                <li>• Market trends across TMT, Healthcare, and Energy</li>
+                                <li>• Deal structure and strategic analysis</li>
+                                <li>• Industry-specific insights and forecasts</li>
+                            </ul>
+                            <p class="mt-2 text-gray-800">What would you like to know?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="border-t border-gray-200 p-6">
+                    <div class="flex space-x-4">
+                        <div class="flex-1">
+                            <textarea 
+                                id="chat-input" 
+                                rows="2" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none" 
+                                placeholder="Ask me about any deal or market trend..."
+                                data-testid="input-chat-message"
+                                onkeydown="handleKeyPress(event)"></textarea>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <button 
+                                id="send-button"
+                                onclick="sendMessage()" 
+                                class="gradient-primary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center"
+                                data-testid="button-send-message">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
+                            <button 
+                                onclick="clearChat()" 
+                                class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
+                                data-testid="button-clear-chat">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <button onclick="quickPrompt('What are the recent major M&A deals in the TMT sector?')" class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition-colors" data-testid="button-quick-tmt">
+                            Recent TMT M&A
+                        </button>
+                        <button onclick="quickPrompt('Analyze the current healthcare investment landscape')" class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full hover:bg-green-100 transition-colors" data-testid="button-quick-healthcare">
+                            Healthcare Trends
+                        </button>
+                        <button onclick="quickPrompt('What are the energy sector valuation multiples?')" class="text-xs bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full hover:bg-yellow-100 transition-colors" data-testid="button-quick-energy">
+                            Energy Valuations
+                        </button>
+                        <button onclick="quickPrompt('Explain the latest tech IPO trends')" class="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-100 transition-colors" data-testid="button-quick-ipo">
+                            Tech IPO Trends
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isTyping = false;
+
+        // Check authentication on page load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/user');
+                if (!response.ok) {
+                    window.location.href = '/static/index.html';
+                    return;
+                }
+                const user = await response.json();
+                document.getElementById('welcome-text').textContent = `Welcome, ${user.name || 'User'}`;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/static/index.html';
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/static/index.html';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                window.location.href = '/static/index.html';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function quickPrompt(message) {
+            document.getElementById('chat-input').value = message;
+            sendMessage();
+        }
+
+        function addMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${isUser ? 'justify-end' : 'items-start space-x-3'}`;
+
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="message-bubble gradient-primary text-white rounded-2xl px-4 py-3">
+                        <p>${content}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <div class="message-bubble bg-gray-100 rounded-2xl px-4 py-3">
+                        <p class="text-gray-800">${content}</p>
+                    </div>
+                `;
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex items-start space-x-3';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <div class="message-bubble bg-gray-100 rounded-2xl px-4 py-3">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-indicator"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-indicator" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-indicator" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+
+            // Add user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Set typing state
+            isTyping = true;
+            document.getElementById('send-button').disabled = true;
+            addTypingIndicator();
+
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get AI response');
+                }
+
+                const data = await response.json();
+                
+                // Remove typing indicator and add AI response
+                removeTypingIndicator();
+                addMessage(data.response);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                addMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.');
+            } finally {
+                isTyping = false;
+                document.getElementById('send-button').disabled = false;
+            }
+        }
+
+        function clearChat() {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = `
+                <!-- Welcome Message -->
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <div class="message-bubble bg-gray-100 rounded-2xl px-4 py-3">
+                        <p class="text-gray-800">
+                            Hi! I'm your AI assistant for deal analysis and market intelligence. I can help you with:
+                        </p>
+                        <ul class="mt-2 text-sm text-gray-600 space-y-1">
+                            <li>• Recent M&A transactions and valuations</li>
+                            <li>• Market trends across TMT, Healthcare, and Energy</li>
+                            <li>• Deal structure and strategic analysis</li>
+                            <li>• Industry-specific insights and forecasts</li>
+                        </ul>
+                        <p class="mt-2 text-gray-800">What would you like to know?</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

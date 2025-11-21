@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(206, 100%, 16%);
+  --muted: hsl(203, 54%, 88%);
+  --muted-foreground: hsl(206, 18%, 66%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(206, 100%, 16%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(206, 100%, 16%);
+  --border: hsl(206, 20%, 82%);
+  --input: hsl(206, 20%, 82%);
+  --primary: hsl(200, 76%, 41%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(206, 100%, 16%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(203, 54%, 53%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(200, 76%, 41%);
+  --radius: 0.5rem;
+  --dark: hsl(206, 100%, 16%);
+  
+  --blue: hsl(200, 76%, 41%);
+  --blue-80: hsl(203, 54%, 53%);
+  --blue-40: hsl(203, 55%, 76%);
+  --blue-20: hsl(203, 54%, 88%);
+  --navy: hsl(206, 100%, 16%);
+  --navy-80: hsl(206, 38%, 33%);
+  --navy-40: hsl(206, 18%, 66%);
+  --navy-20: hsl(206, 20%, 82%);
+}
+
+.dark {
+  --background: hsl(206, 100%, 16%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(206, 38%, 33%);
+  --muted-foreground: hsl(206, 18%, 66%);
+  --popover: hsl(206, 38%, 33%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(206, 38%, 33%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(206, 38%, 33%);
+  --input: hsl(206, 38%, 33%);
+  --primary: hsl(203, 54%, 53%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(203, 55%, 76%);
+  --secondary-foreground: hsl(206, 100%, 16%);
+  --accent: hsl(200, 76%, 41%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(203, 54%, 53%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom gradient backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(200, 76%, 41%) 0%, hsl(203, 54%, 53%) 50%, hsl(206, 100%, 16%) 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, hsl(203, 54%, 53%) 0%, hsl(200, 76%, 41%) 100%);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom button hover effects */
+.btn-primary {
+  @apply bg-primary hover:bg-accent text-primary-foreground transition-all duration-200 transform hover:scale-105;
+}
+
+.btn-secondary {
+  @apply border-2 border-white text-white hover:bg-white hover:text-primary transition-all duration-200;
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scale-hover:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
