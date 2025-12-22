@@ -1322,19 +1322,48 @@
             overlay.classList.add('hidden');
         }
 
+        // Smooth "streaming" reveal for accounting flashcard answer
+        const accountingFlashcardAnimationTimeouts = [];
+
         function toggleAccountingFlashcardAnswer() {
             const answer = document.getElementById('accountingFlashcardAnswer');
             const toggleBtn = document.getElementById('accountingFlashcardToggleBtn');
             if (!answer || !toggleBtn) return;
 
+            const chunks = Array.from(answer.querySelectorAll('[data-flashcard-chunk]'));
             const isHidden = answer.classList.contains('hidden');
 
+            // Helper to reset chunk styles
+            const resetChunks = () => {
+                chunks.forEach(chunk => {
+                    chunk.style.opacity = '0';
+                    chunk.style.transform = 'translateY(4px)';
+                });
+            };
+
+            // Clear any in-flight animations
+            accountingFlashcardAnimationTimeouts.forEach(id => clearTimeout(id));
+            accountingFlashcardAnimationTimeouts.length = 0;
+
             if (isHidden) {
+                // Show container and animate chunks in sequence
                 answer.classList.remove('hidden');
+                resetChunks();
                 toggleBtn.textContent = 'Hide answer';
+
+                chunks.forEach((chunk, index) => {
+                    const timeoutId = window.setTimeout(() => {
+                        chunk.style.transition = 'opacity 220ms ease-out, transform 220ms ease-out';
+                        chunk.style.opacity = '1';
+                        chunk.style.transform = 'translateY(0)';
+                    }, 90 * index);
+                    accountingFlashcardAnimationTimeouts.push(timeoutId);
+                });
             } else {
+                // Hide container and reset chunks
                 answer.classList.add('hidden');
                 toggleBtn.textContent = 'Show answer';
+                resetChunks();
             }
         }
 
@@ -2084,7 +2113,7 @@
 
                     <!-- Answer content -->
                     <div id="accountingFlashcardAnswer" class="mt-6 space-y-4 text-sm text-anthropic-slate leading-relaxed hidden">
-                        <div>
+                        <div data-flashcard-chunk>
                             <p class="font-semibold mb-1">Starting on the Income Statement (IS)</p>
                             <ul class="list-disc list-inside space-y-1">
                                 <li>Pre-tax income down by 50.</li>
@@ -2092,7 +2121,7 @@
                             </ul>
                         </div>
 
-                        <div>
+                        <div data-flashcard-chunk>
                             <p class="font-semibold mb-1">Moving onto the Cash Flow Statement (SCF)</p>
                             <ul class="list-disc list-inside space-y-1">
                                 <li>NI down by 35.</li>
@@ -2101,7 +2130,7 @@
                             </ul>
                         </div>
 
-                        <div>
+                        <div data-flashcard-chunk>
                             <p class="font-semibold mb-1">Finally, on the Balance Sheet (BS)</p>
                             <ul class="list-disc list-inside space-y-1">
                                 <li>Assets: Cash up by 15.</li>
@@ -2110,7 +2139,7 @@
                             </ul>
                         </div>
 
-                        <p class="text-xs text-anthropic-cloud-dark mt-2">
+                        <p class="text-xs text-anthropic-cloud-dark mt-2" data-flashcard-chunk>
                             The balance sheet balances: Assets ↑15 and Shareholders’ Equity ↑15.
                         </p>
                     </div>
