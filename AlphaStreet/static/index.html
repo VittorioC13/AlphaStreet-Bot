@@ -925,7 +925,7 @@
             <!-- TECHNICALS DECKS -->
             
             <!-- Accounting Deck - Ocean Teal -->
-            <div class="album-card technicals-deck cursor-pointer" style="display: none;" onclick="alert('Coming soon!')" data-testid="album-accounting">
+            <div class="album-card technicals-deck cursor-pointer" style="display: none;" onclick="openAccountingFlashcard()" data-testid="album-accounting">
                 <div class="h-full card-deck-content p-8 flex flex-col justify-between shadow-lg" style="background: linear-gradient(145deg, #FAFBFC 0%, #F5F7F9 100%); box-shadow: 0 8px 32px rgba(0, 43, 81, 0.12); border: 1px solid rgba(0, 43, 81, 0.1);">
                     <div class="absolute top-0 left-0 right-0 h-1.5" style="background: linear-gradient(90deg, #335D63 0%, #42757C 100%);"></div>
                     <div class="flex-1 flex items-center justify-center">
@@ -954,7 +954,7 @@
                             <span class="text-sm font-medium text-anthropic-cloud-dark ml-4">152 Premium</span>
                         </div>
                         <div class="text-3xl font-bold text-anthropic-slate mb-2">Accounting</div>
-                        <button class="mt-4 px-6 py-2 text-white rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105" style="background: linear-gradient(135deg, #1D7EB6 0%, #36A3D9 100%);">
+                        <button class="mt-4 px-6 py-2 text-white rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105" style="background: linear-gradient(135deg, #1D7EB6 0%, #36A3D9 100%);" type="button">
                             Browse Questions →
                         </button>
                     </div>
@@ -1319,6 +1319,48 @@
 
             // Open the weekly brief PDF in a new tab
             window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        /**
+         * Accounting technicals flashcard
+         * Q: 3-statement impact of $50 increase in stock-based comp at 30% tax rate.
+         */
+        function openAccountingFlashcard() {
+            const overlay = document.getElementById('accountingFlashcardOverlay');
+            const answer = document.getElementById('accountingFlashcardAnswer');
+            const toggleBtn = document.getElementById('accountingFlashcardToggleBtn');
+
+            if (!overlay) return;
+
+            // Reset state each time we open
+            if (answer && toggleBtn) {
+                answer.classList.add('hidden');
+                toggleBtn.textContent = 'Show answer';
+            }
+
+            overlay.classList.remove('hidden');
+        }
+
+        function closeAccountingFlashcard() {
+            const overlay = document.getElementById('accountingFlashcardOverlay');
+            if (!overlay) return;
+            overlay.classList.add('hidden');
+        }
+
+        function toggleAccountingFlashcardAnswer() {
+            const answer = document.getElementById('accountingFlashcardAnswer');
+            const toggleBtn = document.getElementById('accountingFlashcardToggleBtn');
+            if (!answer || !toggleBtn) return;
+
+            const isHidden = answer.classList.contains('hidden');
+
+            if (isHidden) {
+                answer.classList.remove('hidden');
+                toggleBtn.textContent = 'Hide answer';
+            } else {
+                answer.classList.add('hidden');
+                toggleBtn.textContent = 'Show answer';
+            }
         }
 
         function switchMarketTier(tier) {
@@ -1929,6 +1971,75 @@
             });
         });
     </script>
+
+    <!-- Accounting Technicals Flashcard Modal -->
+    <div id="accountingFlashcardOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="relative w-full max-w-2xl mx-4 rounded-3xl bg-white shadow-2xl p-8 md:p-10">
+            <!-- Close button -->
+            <button type="button" onclick="closeAccountingFlashcard()" class="absolute top-4 right-4 text-anthropic-cloud-dark hover:text-anthropic-slate transition-colors">
+                <span class="sr-only">Close</span>
+                ✕
+            </button>
+
+            <!-- Tags row -->
+            <div class="flex flex-wrap items-center gap-2 mb-4 text-xs font-medium">
+                <span class="px-3 py-1 rounded-full bg-anthropic-ivory-dark text-anthropic-slate uppercase tracking-wide">Technical</span>
+                <span class="px-3 py-1 rounded-full bg-anthropic-ivory-dark text-anthropic-slate uppercase tracking-wide">Accounting</span>
+                <span class="px-3 py-1 rounded-full bg-anthropic-ivory-dark text-anthropic-cloud-dark tracking-wide">Advanced</span>
+            </div>
+
+            <!-- Question -->
+            <h2 class="text-lg md:text-xl font-semibold text-anthropic-slate mb-3">
+                Assuming a 30% tax rate, walk me through the 3 financial statements with a $50 increase in stock-based compensation.
+            </h2>
+
+            <!-- Divider -->
+            <div class="h-px w-full bg-anthropic-ivory-dark my-5"></div>
+
+            <!-- Answer toggle -->
+            <button
+                id="accountingFlashcardToggleBtn"
+                type="button"
+                onclick="toggleAccountingFlashcardAnswer()"
+                class="inline-flex items-center px-4 py-2 rounded-full bg-button-primary text-white text-sm font-medium shadow-md hover:bg-button-hover transition-all"
+            >
+                Show answer
+            </button>
+
+            <!-- Answer content -->
+            <div id="accountingFlashcardAnswer" class="mt-6 space-y-4 text-sm text-anthropic-slate leading-relaxed hidden">
+                <div>
+                    <p class="font-semibold mb-1">Starting on the Income Statement (IS)</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Pre-tax income down by 50.</li>
+                        <li>Net income (NI) down by 35 (50 × (1 − 30%) = 35).</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="font-semibold mb-1">Moving onto the Cash Flow Statement (SCF)</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>NI down by 35.</li>
+                        <li>Add back 50 in CFO because stock-based compensation is a non-cash expense.</li>
+                        <li>Net change in cash is up 15.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="font-semibold mb-1">Finally, on the Balance Sheet (BS)</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Assets: Cash up by 15.</li>
+                        <li>Liabilities: No change.</li>
+                        <li>Shareholders’ Equity: Up by 15 (stock-based comp up 50, retained earnings down 35).</li>
+                    </ul>
+                </div>
+
+                <p class="text-xs text-anthropic-cloud-dark mt-2">
+                    The balance sheet balances: Assets ↑15 and Shareholders’ Equity ↑15.
+                </p>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
