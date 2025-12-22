@@ -1599,21 +1599,34 @@
             const reportInfoCard = document.getElementById('reportInfoCard');
             const pdfViewer = document.getElementById('pdfViewer');
             
-            // Map sector to correct PDF filename (Industrial -> Industry)
-            const sectorMap = {
-                'TMT': 'TMT',
-                'Energy': 'Energy', 
-                'Healthcare': 'Healthcare',
-                'Consumer': 'Consumer',
-                'Industrial': 'Industry' // Map Industrial to Industry
+            /**
+             * Map each deck to a concrete PDF file.
+             *
+             * IMPORTANT:
+             *  - These paths are absolute from your Vercel "Root Directory" (`AlphaStreet/static`).
+             *  - For example, `/pdfs/TMT_DECK.pdf` expects a file at `AlphaStreet/static/pdfs/TMT_DECK.pdf`.
+             *  - Upload your real PDFs with these filenames into `AlphaStreet/static/pdfs/`.
+             */
+            const pdfFileMap = {
+                TMT: '/pdfs/TMT_DECK.pdf',
+                Energy: '/pdfs/ENERGY_DECK.pdf',
+                Healthcare: '/pdfs/HEALTHCARE_DECK.pdf',
+                Consumer: '/pdfs/CONSUMER_DECK.pdf',
+                Industrial: '/pdfs/INDUSTRIAL_DECK.pdf',
+                Equities: '/pdfs/EQUITIES_DECK.pdf',
+                FixedIncome: '/pdfs/FIXED_INCOME_DECK.pdf',
+                Derivatives: '/pdfs/DERIVATIVES_DECK.pdf',
+                FXCommodities: '/pdfs/FX_COMMODITIES_DECK.pdf',
+                PostDeal: '/pdfs/POST_DEAL_DECK.pdf',
+                SpecialSituations: '/pdfs/SPECIAL_SITUATIONS_DECK.pdf'
             };
             
-            const pdfSector = sectorMap[sector] || sector;
-            pdfUrl = `/demo/assets/briefs/US_${pdfSector}_Brief_2025-09-11.pdf`;
-            if(pdfSector == 'Healthcare'){
-                pdfUrl = `/demo/assets/briefs/US_${pdfSector}_Brief_2025-09-15.pdf`;
-            }
+            const pdfUrl = pdfFileMap[sector];
             
+            if (!pdfUrl) {
+                console.warn('No PDF mapped for sector:', sector);
+                return;
+            }
             
             // Set PDF source
             pdfViewer.src = pdfUrl;
