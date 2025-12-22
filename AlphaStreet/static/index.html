@@ -1296,9 +1296,29 @@
         }
 
         function openWeeklyBrief(type) {
-            // Placeholder for opening weekly brief modal/page
-            console.log('Opening weekly brief for:', type);
-            alert('Weekly Brief: ' + type.charAt(0).toUpperCase() + type.slice(1) + ' Market\n\nThis feature will show your consolidated weekly intelligence report.');
+            /**
+             * Weekly brief PDFs for the summary cards (e.g. "Primary Market – Deal flow summary").
+             *
+             * IMPORTANT:
+             *  - These URLs are absolute from the Vercel root (`AlphaStreet/static`).
+             *  - For example, `/pdfs/PRIMARY_MARKET_BRIEF.pdf` expects
+             *    a file at `AlphaStreet/static/pdfs/PRIMARY_MARKET_BRIEF.pdf`.
+             */
+            const weeklyPdfMap = {
+                primary: '/pdfs/PRIMARY_MARKET_BRIEF.pdf',
+                // secondary: '/pdfs/SECONDARY_MARKET_BRIEF.pdf',
+                // technicals: '/pdfs/TECHNICALS_PROGRESS_BRIEF.pdf'
+            };
+
+            const pdfUrl = weeklyPdfMap[type];
+
+            if (!pdfUrl) {
+                console.warn('No weekly brief PDF configured for type:', type);
+                return;
+            }
+
+            // Open the weekly brief PDF in a new tab
+            window.open(pdfUrl, '_blank', 'noopener,noreferrer');
         }
 
         function switchMarketTier(tier) {
