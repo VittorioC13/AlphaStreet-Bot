@@ -924,37 +924,32 @@
 
             <!-- TECHNICALS DECKS -->
             
-            <!-- Accounting Deck - Ocean Teal -->
-            <div class="album-card technicals-deck cursor-pointer" style="display: none;" onclick="openAccountingFlashcard()" data-testid="album-accounting">
+            <!-- DCF Deck - Terracotta (moved to first position) -->
+            <div class="album-card technicals-deck cursor-pointer" style="display: none;" onclick="alert('Coming soon!')" data-testid="album-dcf">
                 <div class="h-full card-deck-content p-8 flex flex-col justify-between shadow-lg" style="background: linear-gradient(145deg, #FAFBFC 0%, #F5F7F9 100%); box-shadow: 0 8px 32px rgba(0, 43, 81, 0.12); border: 1px solid rgba(0, 43, 81, 0.1);">
-                    <div class="absolute top-0 left-0 right-0 h-1.5" style="background: linear-gradient(90deg, #335D63 0%, #42757C 100%);"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1.5" style="background: linear-gradient(90deg, #8B4E4A 0%, #A25F5C 100%);"></div>
                     <div class="flex-1 flex items-center justify-center">
-                        <svg width="140" height="140" viewBox="0 0 120 120" class="opacity-80" style="color: #335D63;">
+                        <svg width="140" height="140" viewBox="0 0 120 120" class="opacity-80" style="color: #8B4E4A;">
                             <g stroke="currentColor" fill="none" stroke-width="2">
-                                <!-- Calculator icon -->
-                                <rect x="35" y="25" width="50" height="70" rx="4" fill="currentColor" opacity="0.1"/>
-                                <rect x="35" y="25" width="50" height="70" rx="4"/>
-                                <rect x="40" y="35" width="40" height="12" fill="currentColor" opacity="0.3"/>
-                                <!-- Buttons -->
-                                <circle cx="47" cy="55" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="60" cy="55" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="73" cy="55" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="47" cy="65" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="60" cy="65" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="73" cy="65" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="47" cy="75" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="60" cy="75" r="3" fill="currentColor" opacity="0.4"/>
-                                <circle cx="73" cy="75" r="3" fill="currentColor" opacity="0.4"/>
+                                <!-- Flow chart icon -->
+                                <rect x="40" y="25" width="40" height="15" rx="3" fill="currentColor" opacity="0.2"/>
+                                <rect x="40" y="25" width="40" height="15" rx="3"/>
+                                <line x1="60" y1="40" x2="60" y2="50" stroke-width="2" marker-end="url(#arrow)"/>
+                                <rect x="40" y="50" width="40" height="15" rx="3" fill="currentColor" opacity="0.2"/>
+                                <rect x="40" y="50" width="40" height="15" rx="3"/>
+                                <line x1="60" y1="65" x2="60" y2="75" stroke-width="2" marker-end="url(#arrow)"/>
+                                <rect x="40" y="75" width="40" height="15" rx="3" fill="currentColor" opacity="0.2"/>
+                                <rect x="40" y="75" width="40" height="15" rx="3"/>
                             </g>
                         </svg>
                     </div>
                     <div class="text-center">
                         <div class="mb-3">
-                            <span class="text-sm font-medium text-anthropic-cloud-dark">50 Free</span>
-                            <span class="text-sm font-medium text-anthropic-cloud-dark ml-4">152 Premium</span>
+                            <span class="text-sm font-medium text-anthropic-cloud-dark">42 Free</span>
+                            <span class="text-sm font-medium text-anthropic-cloud-dark ml-4">111 Premium</span>
                         </div>
-                        <div class="text-3xl font-bold text-anthropic-slate mb-2">Accounting</div>
-                        <button class="mt-4 px-6 py-2 text-white rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105" style="background: linear-gradient(135deg, #1D7EB6 0%, #36A3D9 100%);" type="button">
+                        <div class="text-3xl font-bold text-anthropic-slate mb-2">DCF</div>
+                        <button class="mt-4 px-6 py-2 text-white rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105" style="background: linear-gradient(135deg, #1D7EB6 0%, #36A3D9 100%);">
                             Browse Questions →
                         </button>
                     </div>
@@ -1029,32 +1024,37 @@
                 </div>
             </div>
 
-            <!-- DCF Deck - Terracotta -->
-            <div class="album-card technicals-deck cursor-pointer" style="display: none;" onclick="alert('Coming soon!')" data-testid="album-dcf">
+            <!-- Accounting Deck - Ocean Teal (moved to center position) -->
+            <div class="album-card technicals-deck cursor-pointer" style="display: none;" onclick="openAccountingFlashcard()" data-testid="album-accounting">
                 <div class="h-full card-deck-content p-8 flex flex-col justify-between shadow-lg" style="background: linear-gradient(145deg, #FAFBFC 0%, #F5F7F9 100%); box-shadow: 0 8px 32px rgba(0, 43, 81, 0.12); border: 1px solid rgba(0, 43, 81, 0.1);">
-                    <div class="absolute top-0 left-0 right-0 h-1.5" style="background: linear-gradient(90deg, #8B4E4A 0%, #A25F5C 100%);"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1.5" style="background: linear-gradient(90deg, #335D63 0%, #42757C 100%);"></div>
                     <div class="flex-1 flex items-center justify-center">
-                        <svg width="140" height="140" viewBox="0 0 120 120" class="opacity-80" style="color: #8B4E4A;">
+                        <svg width="140" height="140" viewBox="0 0 120 120" class="opacity-80" style="color: #335D63;">
                             <g stroke="currentColor" fill="none" stroke-width="2">
-                                <!-- Flow chart icon -->
-                                <rect x="40" y="25" width="40" height="15" rx="3" fill="currentColor" opacity="0.2"/>
-                                <rect x="40" y="25" width="40" height="15" rx="3"/>
-                                <line x1="60" y1="40" x2="60" y2="50" stroke-width="2" marker-end="url(#arrow)"/>
-                                <rect x="40" y="50" width="40" height="15" rx="3" fill="currentColor" opacity="0.2"/>
-                                <rect x="40" y="50" width="40" height="15" rx="3"/>
-                                <line x1="60" y1="65" x2="60" y2="75" stroke-width="2" marker-end="url(#arrow)"/>
-                                <rect x="40" y="75" width="40" height="15" rx="3" fill="currentColor" opacity="0.2"/>
-                                <rect x="40" y="75" width="40" height="15" rx="3"/>
+                                <!-- Calculator icon -->
+                                <rect x="35" y="25" width="50" height="70" rx="4" fill="currentColor" opacity="0.1"></rect>
+                                <rect x="35" y="25" width="50" height="70" rx="4"></rect>
+                                <rect x="40" y="35" width="40" height="12" fill="currentColor" opacity="0.3"></rect>
+                                <!-- Buttons -->
+                                <circle cx="47" cy="55" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="60" cy="55" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="73" cy="55" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="47" cy="65" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="60" cy="65" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="73" cy="65" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="47" cy="75" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="60" cy="75" r="3" fill="currentColor" opacity="0.4"></circle>
+                                <circle cx="73" cy="75" r="3" fill="currentColor" opacity="0.4"></circle>
                             </g>
                         </svg>
                     </div>
                     <div class="text-center">
                         <div class="mb-3">
-                            <span class="text-sm font-medium text-anthropic-cloud-dark">42 Free</span>
-                            <span class="text-sm font-medium text-anthropic-cloud-dark ml-4">111 Premium</span>
+                            <span class="text-sm font-medium text-anthropic-cloud-dark">50 Free</span>
+                            <span class="text-sm font-medium text-anthropic-cloud-dark ml-4">152 Premium</span>
                         </div>
-                        <div class="text-3xl font-bold text-anthropic-slate mb-2">DCF</div>
-                        <button class="mt-4 px-6 py-2 text-white rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105" style="background: linear-gradient(135deg, #1D7EB6 0%, #36A3D9 100%);">
+                        <div class="text-3xl font-bold text-anthropic-slate mb-2">Accounting</div>
+                        <button class="mt-4 px-6 py-2 text-white rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105" style="background: linear-gradient(135deg, #1D7EB6 0%, #36A3D9 100%);" type="button">
                             Browse Questions →
                         </button>
                     </div>
@@ -1432,7 +1432,7 @@
                 technicalsBtn.className = 'text-xl font-light tracking-wide text-white transition-all duration-300 border-b-2 border-white/80 pb-1';
                 marketSenseBtn.className = 'text-xl font-light tracking-wide text-white/40 hover:text-white/70 transition-all duration-300 border-b-2 border-transparent pb-1';
                 
-                // Reset to center album (DCF is fourth, index 3)
+                // Reset to center album (Accounting deck is fourth, index 3)
                 currentIndex = 3;
                 updateCoverFlow();
                 scrollToCurrentAlbum();
