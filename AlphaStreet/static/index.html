@@ -1296,29 +1296,13 @@
         }
 
         function openWeeklyBrief(type) {
-            /**
-             * Weekly brief PDFs for the summary cards (e.g. "Primary Market – Deal flow summary").
-             *
-             * IMPORTANT:
-             *  - These URLs are absolute from the Vercel root (`AlphaStreet/static`).
-             *  - For example, `/pdfs/PRIMARY_MARKET_BRIEF.pdf` expects
-             *    a file at `AlphaStreet/static/pdfs/PRIMARY_MARKET_BRIEF.pdf`.
-             */
-            const weeklyPdfMap = {
-                primary: '/pdfs/PRIMARY_MARKET_BRIEF.pdf',
-                // secondary: '/pdfs/SECONDARY_MARKET_BRIEF.pdf',
-                // technicals: '/pdfs/TECHNICALS_PROGRESS_BRIEF.pdf'
-            };
-
-            const pdfUrl = weeklyPdfMap[type];
-
-            if (!pdfUrl) {
-                console.warn('No weekly brief PDF configured for type:', type);
+            // For now, only Primary Market uses the full overlay treatment
+            if (type === 'primary') {
+                showWeeklyPrimaryBrief();
                 return;
             }
-
-            // Open the weekly brief PDF in a new tab
-            window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+            
+            console.warn('Weekly brief not yet configured for type:', type);
         }
 
         /**
@@ -1714,6 +1698,50 @@
                 overlay.classList.add('hidden');
                 pdfViewer.src = ''; // Clear PDF to stop loading
             }, 300);
+        }
+
+        // Weekly Primary Market brief overlay (deck on left, PDF on right)
+        function showWeeklyPrimaryBrief() {
+            const overlay = document.getElementById('pdfPreviewOverlay');
+            const reportInfoCard = document.getElementById('reportInfoCard');
+            const pdfViewer = document.getElementById('pdfViewer');
+
+            if (!overlay || !reportInfoCard || !pdfViewer) {
+                console.warn('Weekly primary brief elements not found');
+                return;
+            }
+
+            // Set PDF source for the Primary Market weekly brief
+            pdfViewer.src = '/pdfs/PRIMARY_MARKET_BRIEF.pdf';
+
+            // Style and content to mirror the Weekly → Primary Market card
+            reportInfoCard.className = 'w-80 h-96 rounded-3xl shadow-2xl flex items-center justify-center';
+            reportInfoCard.innerHTML = `
+                <div class="relative w-72 p-10 rounded-3xl" style="background: rgba(255,255,255,0.06); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="mb-8 flex justify-center text-white/80">
+                        <svg width="64" height="64" viewBox="0 0 64 64" class="text-white/60">
+                            <circle cx="32" cy="28" r="16" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+                            <path d="M32 18 L32 28 L40 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <line x1="16" y1="52" x2="48" y2="52" stroke="currentColor" stroke-width="1.5" opacity="0.4"></line>
+                            <line x1="20" y1="56" x2="44" y2="56" stroke="currentColor" stroke-width="1" opacity="0.2"></line>
+                        </svg>
+                    </div>
+                    <div class="text-center text-white">
+                        <h3 class="text-xl font-light mb-2">Primary Market</h3>
+                        <p class="text-sm text-white/60 font-light">Deal flow summary</p>
+                    </div>
+                    <div class="mt-8 flex justify-center">
+                        <span class="text-white/50 text-sm">Read brief →</span>
+                    </div>
+                </div>
+            `;
+
+            // Show overlay with animation (same pattern as showPDFPreview)
+            overlay.classList.remove('hidden');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+            }, 10);
         }
 
         function generateReportInfoCard(sector, container) {
