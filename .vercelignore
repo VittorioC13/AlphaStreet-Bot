@@ -35,3 +35,6 @@ Thumbs.db
 node_modules/
 npm-debug.log
 yarn-error.log
+
+api_backup/
+demo_AlphaStreet/
