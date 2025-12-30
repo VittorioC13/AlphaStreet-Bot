@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AlphaStreet Bot</title>
+    <meta name="description" content="Access your AlphaStreet Bot dashboard with sector reports and AI assistant.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/tmt.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'anthropic-terracotta': '#187ABA',
+                        'anthropic-kraft': '#4695C8',
+                        'anthropic-manila': '#A3CAE3',
+                        'anthropic-ivory': '#F3F6FA',
+                        'anthropic-slate': '#0C2740',
+                        'anthropic-cloud-dark': '#4B6483',
+                        'anthropic-cloud-medium': '#8095AD',
+                        'anthropic-cloud-light': '#99B5D4',
+                        'anthropic-ivory-dark': '#E6EEF6',
+                        'custom-sage-green': '#A8D5A8',
+                        'custom-soft-lavender': '#C8B8E0'
+                    },
+                    fontFamily: {
+                        'styrene': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    borderRadius: {
+                        'anthropic': '24px'
+                    },
+                    boxShadow: {
+                        'anthropic': '0 8px 32px rgba(16, 16, 16, 0.08)',
+                        'anthropic-hover': '0 16px 48px rgba(16, 16, 16, 0.12)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- ===========================
+         MAP SECTION DISABLED (LOGIC)
+         Feature flag and safe no-op stubs for common initializers.
+         To re-enable, delete this block.
+    ============================-->
+    <script>
+        const map_disabled = true;
+        // If any inline/onload code calls these, they become harmless.
+        window.initMap = window.initMap || function () { if (map_disabled) return; };
+        window.load_map = window.load_map || function () { if (map_disabled) return; };
+        window.render_map = window.render_map || function () { if (map_disabled) return; };
+
+        // Hide any map-y elements on DOM ready as an extra guard.
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!map_disabled) return;
+            const ids = ['map', 'map-container', 'world-map'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            document.querySelectorAll('[data-role="map"]').forEach(el => el.style.display = 'none');
+        });
+    </script>
+</head>
+<body class="font-styrene antialiased">
+    
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-anthropic sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                        <span class="text-2xl font-bold text-anthropic-slate" data-testid="text-logo">AlphaStreet BOT</span>
+                    </a>
+        </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/reports" class="text-anthropic-cloud-medium hover:text-anthropic-slate transition-colors font-medium">Reports</a>
+                    <button onclick="logout()" class="bg-white border border-anthropic-cloud-light text-anthropic-slate px-6 py-2 rounded-lg hover:shadow-anthropic transition-all font-medium" data-testid="button-logout">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Cover Flow Collection - EXACT copy of main page structure -->
+    <main class="h-screen flex flex-col items-center pt-16">
+        
+        <!-- Collection Title -->
+        <div class="text-center mb-16 fade-in">
+            <h1 class="text-5xl lg:text-6xl font-medium tracking-tight text-anthropic-slate mb-8 leading-tight">
+                Cards that Kill IBD Recruiting
+            </h1>
+        </div>
+
+
+        <!-- Sector Selection for Basic Users - Always reserve space -->
+        <div id="sector-selection" class="text-center mt-4 mb-8 fade-in" style="display: none;">
+            <div class="inline-flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-lg px-6 py-4 shadow-sm border border-anthropic-cloud-light">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium text-anthropic-cloud-dark">Current Sector:</span>
+                    <span id="current-sector" class="text-sm font-bold text-anthropic-slate"></span>
+                    </div>
+                <div class="flex items-center space-x-2">
+                    <label for="sector-select" class="text-sm font-medium text-anthropic-cloud-dark">Change to:</label>
+                    <select id="sector-select" class="text-sm bg-white border border-anthropic-cloud-light rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-anthropic-terracotta">
+                        <option value="">Select Sector</option>
+                        <option value="TMT">TMT</option>
+                        <option value="Energy">Energy</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Consumer">Consumer</option>
+                        <option value="Industry">Industry</option>
+                    </select>
+                    <button id="change-sector-btn" class="text-xs bg-anthropic-terracotta text-white px-3 py-1 rounded hover:bg-anthropic-kraft transition-colors" disabled>
+                        Change
+                    </button>
+                </div>
+                <div id="sector-change-info" class="text-xs text-anthropic-cloud-medium"></div>
+            </div>
+        </div>
+
+        <!-- AlphaStreet Bot Chat Button / Purchase Premium Button -->
+        <div class="text-center mb-12 fade-in">
+            <!-- Talk to AlphaStreet Bot Button - Only for Premium Users -->
+            <button id="chat-button" onclick="openTmtBot()" class="chat-button inline-flex items-center px-12 py-5 text-white font-bold text-xl rounded-2xl hidden" data-testid="button-chat-tmt">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="mr-3">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="11" r="1" fill="currentColor"/>
+                    <circle cx="8" cy="11" r="1" fill="currentColor"/>
+                    <circle cx="16" cy="11" r="1" fill="currentColor"/>
+                </svg>
+                Talk to AlphaStreet BOT
+            </button>
+            
+            <!-- Unlock Offer Button - For Basic and Non-Premium Users -->
+            <a id="purchase-button" href="/payment" class="inline-flex items-center px-12 py-5 text-anthropic-slate font-medium text-xl rounded-2xl bg-anthropic-kraft/20 hover:bg-anthropic-kraft/30 border-2 border-anthropic-kraft/40 hover:border-anthropic-kraft/60 transition-all duration-300 shadow-anthropic hover:shadow-anthropic-hover transform hover:scale-105 hidden" data-testid="button-purchase-premium">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="mr-3">
+                    <path d="M12 15l-3-3h6l-3 3z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 12V7a4 4 0 0 1 8 0v5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="3" y="12" width="18" height="8" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Unlock Offer
+            </a>
+                </div>
+
+        <!-- Cover Flow Albums with Navigation - EXACT copy of main page structure -->
+        <div class="relative w-full">
+            <!-- Left Arrow -->
+            <button 
+                id="leftBtn" 
+                class="absolute left-8 top-1/2 transform -translate-y-1/2 z-30 w-16 h-16 bg-white shadow-anthropic rounded-full hover:shadow-anthropic-hover transition-all duration-300 flex items-center justify-center group"
+            >
+                <svg width="24" height="24" viewBox="0 0 24 24" class="text-gray-700 group-hover:text-black">
+                    <path d="M15 18 L9 12 L15 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
+            <button 
+            id="rightBtn"
+            class="absolute right-8 top-1/2 transform -translate-y-1/2 z-30 w-16 h-16 bg-white shadow-anthropic rounded-full hover:shadow-anthropic-hover transition-all duration-300 flex items-center justify-center group"
+            >
+            <svg width="24" height="24" viewBox="0 0 24 24" class="text-gray-700 group-hover:text-black">
+                <path d="M9 6 L15 12 L9 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            </button>
+
+            <!-- Cover Flow Container -->
+            <div class="coverflow-container" id="coverflow">
+            
+                <div id="coverflow_track">
+                    <!-- Healthcare Deck - EXACT copy with rod of asclepius icon -->
+                    <div class="album-card cursor-pointer" onclick="showRegionModal('Healthcare')" data-testid="album-healthcare">
+                        <div class="h-full bg-custom-sage-green card-deck-content p-8 flex flex-col justify-between">
+                            <div class="flex-1 flex items-center justify-center">
+                                <svg width="140" height="140" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80">
+                                    <!-- Rod of Asclepius (snake & staff) -->
+                                    <g stroke="currentColor" fill="none">
+                                        <!-- Staff -->
+                                        <line x1="60" y1="20" x2="60" y2="100" stroke-width="4" stroke-linecap="round"/>
+                                        
+                                        <!-- Snake wrapping around both sides of staff -->
+                                        <path d="M55 30 Q50 35 60 40 Q70 45 55 50 Q50 55 60 60 Q70 65 55 70 Q50 75 60 80 Q70 85 60 90" 
+                                            stroke-width="3" fill="none" stroke-linecap="round"/>
+                                        
+                                        <!-- Snake body details -->
+                                        <path d="M65 35 Q75 40 60 45" stroke-width="2" opacity="0.7"/>
+                                        <path d="M65 55 Q75 60 60 65" stroke-width="2" opacity="0.7"/>
+                                        
+                                        <!-- Snake head -->
+                                        <ellipse cx="55" cy="30" rx="3" ry="2" fill="currentColor"/>
+                                        <circle cx="53" cy="29" r="0.5" fill="white"/>
+                                        <path d="M52 31 L50 32" stroke-width="1" stroke-linecap="round"/>
+                                        
+                                        <!-- Staff top ornament -->
+                                        <circle cx="60" cy="20" r="5" fill="none" stroke-width="2"/>
+                                        <circle cx="60" cy="20" r="2" fill="currentColor"/>
+                                    </g>
+                                </svg>
+                                </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-anthropic-slate mb-2">HEALTHCARE DECK</div>
+                                <div class="text-base text-anthropic-cloud-dark font-regular">Pharma, Biotech & Devices Reports</div>
+                                <div class="text-sm text-anthropic-cloud-medium font-light mt-2">Draw insights from life sciences</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Energy Deck - EXACT copy with lightning icon -->
+                    <div class="album-card cursor-pointer" onclick="showRegionModal('Energy')" data-testid="album-energy">
+                        <div class="h-full bg-anthropic-terracotta card-deck-content p-8 flex flex-col justify-between">
+                            <div class="flex-1 flex items-center justify-center">
+                                <svg width="140" height="140" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80">
+                                    <!-- Simple energy/lightning illustration -->
+                                    <path d="M70 20 L50 60 L65 60 L50 100 L70 60 L55 60 Z" fill="white"/>
+                                    <circle cx="60" cy="60" r="45" fill="none" stroke="white" stroke-width="1.5" opacity="0.3"/>
+                                </svg>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-white mb-2">ENERGY DECK</div>
+                                <div class="text-base text-white/90 font-regular">Oil, Gas & Renewables Reports</div>
+                                <div class="text-sm text-white/70 font-light mt-2">Draw insights from power markets</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TMT Deck - EXACT copy with bamboo icon -->
+                    <div class="album-card cursor-pointer" onclick="showRegionModal('TMT')" data-testid="album-tmt">
+                        <div class="h-full bg-anthropic-manila card-deck-content p-8 flex flex-col justify-between">
+                            <!-- Simple illustration -->
+                            <div class="flex-1 flex items-center justify-center">
+                                <svg width="140" height="140" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80">
+                                    <!-- Elegant bamboo illustration -->
+                                    <g stroke="currentColor" stroke-width="2" fill="none">
+                                        <!-- Bamboo stalks -->
+                                        <line x1="45" y1="20" x2="45" y2="100" stroke-linecap="round"/>
+                                        <line x1="60" y1="15" x2="60" y2="105" stroke-linecap="round"/>
+                                        <line x1="75" y1="25" x2="75" y2="95" stroke-linecap="round"/>
+                                        
+                                        <!-- Bamboo nodes -->
+                                        <line x1="42" y1="35" x2="48" y2="35" stroke-width="3"/>
+                                        <line x1="42" y1="55" x2="48" y2="55" stroke-width="3"/>
+                                        <line x1="42" y1="75" x2="48" y2="75" stroke-width="3"/>
+                                        
+                                        <line x1="57" y1="30" x2="63" y2="30" stroke-width="3"/>
+                                        <line x1="57" y1="50" x2="63" y2="50" stroke-width="3"/>
+                                        <line x1="57" y1="70" x2="63" y2="70" stroke-width="3"/>
+                                        <line x1="57" y1="90" x2="63" y2="90" stroke-width="3"/>
+                                        
+                                        <line x1="72" y1="40" x2="78" y2="40" stroke-width="3"/>
+                                        <line x1="72" y1="60" x2="78" y2="60" stroke-width="3"/>
+                                        <line x1="72" y1="80" x2="78" y2="80" stroke-width="3"/>
+                                        
+                                        <!-- Clean bamboo - no leaves -->
+                                    </g>
+                                </svg>
+                            </div>
+                            <!-- Title -->
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-anthropic-slate mb-2">TMT DECK</div>
+                                <div class="text-base text-anthropic-cloud-dark font-regular">Technology, Media & Telecom Reports</div>
+                                <div class="text-sm text-anthropic-cloud-medium font-light mt-2">Draw insights from innovation trends</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consumer Deck - EXACT copy with diamond/crystal icon -->
+                    <div class="album-card cursor-pointer" onclick="showRegionModal('Consumer')" data-testid="album-consumer">
+                        <div class="h-full bg-anthropic-ivory-dark card-deck-content p-8 flex flex-col justify-between">
+                            <div class="flex-1 flex items-center justify-center">
+                                <svg width="140" height="140" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80">
+                                    <!-- Beautiful diamond/crystal -->
+                                    <g stroke="currentColor" fill="none" stroke-width="2">
+                                        <!-- Diamond top (crown) -->
+                                        <path d="M45 45 L60 25 L75 45" fill="currentColor" opacity="0.1"/>
+                                        <path d="M45 45 L60 25 L75 45"/>
+                                        
+                                        <!-- Diamond middle (girdle) -->
+                                        <line x1="45" y1="45" x2="75" y2="45" stroke-width="3"/>
+                                        
+                                        <!-- Diamond bottom (pavilion) -->
+                                        <path d="M45 45 L60 85 L75 45" fill="currentColor" opacity="0.05"/>
+                                        <path d="M45 45 L60 85 L75 45"/>
+                                        
+                                        <!-- Crown facets -->
+                                        <path d="M52 35 L68 35"/>
+                                        <path d="M60 25 L60 45"/>
+                                        <path d="M50 40 L70 40"/>
+                                        
+                                        <!-- Pavilion facets -->
+                                        <path d="M60 45 L60 85"/>
+                                        <path d="M50 55 L70 55"/>
+                                        
+                                        <!-- Brilliant sparkle -->
+                                        <circle cx="60" cy="35" r="1.5" fill="currentColor" opacity="0.9"/>
+                                        <path d="M57 32 L63 32" stroke-width="1" opacity="0.7"/>
+                                        <path d="M60 29 L60 35" stroke-width="1" opacity="0.7"/>
+                                    </g>
+                                </svg>
+                                </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-anthropic-slate mb-2">CONSUMER DECK</div>
+                                <div class="text-base text-anthropic-cloud-dark font-regular">Retail, Brands & Lifestyle Reports</div>
+                                <div class="text-sm text-anthropic-cloud-medium font-light mt-2">Draw insights from market trends</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Industry Deck - EXACT copy with volcano icon -->
+                    <div class="album-card cursor-pointer" onclick="showRegionModal('Industry')" data-testid="album-industry">
+                        <div class="h-full bg-custom-soft-lavender card-deck-content p-8 flex flex-col justify-between">
+                            <div class="flex-1 flex items-center justify-center">
+                                <svg width="140" height="140" viewBox="0 0 120 120" class="text-anthropic-slate opacity-80">
+                                    <!-- Volcanic formation -->
+                                    <g stroke="currentColor" fill="none" stroke-width="2">
+                                        <!-- Volcano mountain shape -->
+                                        <path d="M20 90 L45 50 L60 30 L75 50 L100 90 Z" fill="currentColor" opacity="0.15"/>
+                                        <path d="M20 90 L45 50 L60 30 L75 50 L100 90"/>
+                                        
+                                        <!-- Crater at peak -->
+                                        <ellipse cx="60" cy="30" rx="8" ry="3" fill="currentColor" opacity="0.3"/>
+                                        
+                                        <!-- Lava/magma glow -->
+                                        <path d="M55 32 Q60 28 65 32" stroke-width="1" opacity="0.7"/>
+                                        <circle cx="58" cy="31" r="1" fill="currentColor" opacity="0.8"/>
+                                        <circle cx="62" cy="30" r="1" fill="currentColor" opacity="0.8"/>
+                                        
+                                        <!-- Rock layers/striations -->
+                                        <path d="M25 80 Q60 75 95 80" stroke-width="1" opacity="0.4"/>
+                                        <path d="M30 70 Q60 65 90 70" stroke-width="1" opacity="0.4"/>
+                                        
+                                        <!-- Heat/steam wisps -->
+                                        <path d="M58 25 Q55 20 58 15" stroke-width="1" opacity="0.5"/>
+                                        <path d="M62 25 Q65 20 62 15" stroke-width="1" opacity="0.5"/>
+                                    </g>
+                                </svg>
+                                </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-anthropic-slate mb-2">INDUSTRY DECK</div>
+                                <div class="text-base text-anthropic-cloud-dark font-regular">Manufacturing & Infrastructure Reports</div>
+                                <div class="text-sm text-anthropic-cloud-medium font-light mt-2">Draw insights from heavy industry</div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+        </div>
+    </main>
+
+    <!-- Transactions x Banks Section -->
+    <section class="py-16 px-8 relative overflow-hidden" style="background: linear-gradient(to bottom, #FAFAF7 0%, #FAFAF7 15%, rgba(248, 241, 228, 0.3) 30%, #F8F1E4 60%, #F8F1E4 100%);">
+        <!-- Decorative curved elements -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute bottom-0 left-0 w-full h-1/3 opacity-30">
+                <svg class="w-full h-full" viewBox="0 0 1200 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0,400 Q300,350 600,380 T1200,400 L1200,400 L0,400 Z" fill="#F8F1E4" opacity="0.4"/>
+                    <path d="M0,400 Q200,360 500,385 T1000,395 L1200,400 L0,400 Z" fill="#EBDBBC" opacity="0.2"/>
+                </svg>
+            </div>
+            <div class="absolute bottom-0 right-0 w-1/3 h-1/4 opacity-20">
+                <svg class="w-full h-full" viewBox="0 0 400 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0,300 Q100,250 200,280 T400,300 L400,300 L0,300 Z" fill="#F8F1E4" opacity="0.3"/>
+                </svg>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto relative z-10">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-4xl lg:text-5xl font-medium tracking-tight text-anthropic-slate mb-6 leading-tight">
+                    Transactions x Banks
+                </h2>
+                <p class="text-xl text-anthropic-cloud-medium font-regular max-w-2xl mx-auto">
+                    Deals Analyzed by AlphaStreet Bot
+                </p>
+            </div>
+
+            <!-- Bulge Bracket Category -->
+            <div class="mb-16">
+                <h3 class="text-2xl lg:text-3xl font-light tracking-tight text-anthropic-slate mb-8 text-left">
+                    Bulge Bracket
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <!-- Goldman Sachs -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('GoldmanSachs')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/GoldmanSachs.jpg" alt="Goldman Sachs" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JPMorgan -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('JPMorgan')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/JPMorgan.jpg" alt="JPMorgan" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Morgan Stanley -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('MorganStanley')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/MorganStanley.jpg" alt="Morgan Stanley" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barclays -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Barclays')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Barclays.jpg" alt="Barclays" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bank of America -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('BankOfAmerica')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/BankOfAmerica.jpg" alt="Bank of America" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Citi -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Citi')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Citi.jpg" alt="Citi" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UBS -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('UBS')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/UBS.jpg" alt="UBS" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deutsche Bank -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('DeutscheBank')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/DeutscheBank.jpg" alt="Deutsche Bank" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Elite Boutique Category -->
+            <div class="mb-16">
+                <h3 class="text-2xl lg:text-3xl font-light tracking-tight text-anthropic-slate mb-8 text-left">
+                    Elite Boutique
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <!-- Evercore -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Evercore')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Evercore_logo.jpg" alt="Evercore" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Centerview Partners -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('CenterviewPartners')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/CenterviewPartners.jpg" alt="Centerview Partners" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PJT Partners -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('PJTPartners')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/PJT.jpg" alt="PJT Partners" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Moelis -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Moelis')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Moelis_logo.jpg" alt="Moelis" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perella Weinberg Partners -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('PerellaWeinberg')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/PWP.jpg" alt="Perella Weinberg Partners" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Qatalyst Partners -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('QatalystPartners')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Qatalyst.jpg" alt="Qatalyst Partners" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Market Category -->
+            <div class="mb-16">
+                <h3 class="text-2xl lg:text-3xl font-light tracking-tight text-anthropic-slate mb-8 text-left">
+                    Middle Market
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <!-- Jefferies -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Jefferies')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Jefferies.jpg" alt="Jefferies" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wells Fargo -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('WellsFargo')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Wells_Fargo_logo.jpg" alt="Wells Fargo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guggenheim -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Guggenheim')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/Guggenheim.jpg" alt="Guggenheim" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rothschild & Co -->
+                    <div class="group cursor-pointer" onclick="openBankDeals('Rothschild')">
+                        <div class="aspect-video rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative">
+                            <img src="/static/assets/images/RothchildAndCo.jpg" alt="Rothschild & Co" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-4/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex items-center justify-center overflow-hidden rounded-t-xl" style="width: 70%;">
+                                <img src="/static/assets/pictures/Report_Screenshot.png" alt="Report Preview" class="w-full h-full object-cover object-top rounded-t-xl">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<script>
+/* =========================
+   Globals & constants
+========================= */
+let user = null;
+let currentRegion   = '';
+let currentSector   = '';
+let currentOpenDoc  = 'brief'; // 'brief' | 'tldr'
+
+const BRIEF_BASE = '/static/assets/briefs';
+const TLDR_BASE  = '/static/assets/TLDR';
+
+/* =========================================
+   Auth + user helpers
+========================================= */
+function normalizeUser(payload) {
+  const body = payload && 'body' in payload ? payload.body : payload;
+  return body?.user || body || null;
+}
+
+async function fetchWithAuth(url, options = {}) {
+  try {
+    const res = await fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+    });
+    const ct = res.headers.get('content-type') || '';
+    const body = ct.includes('application/json') ? await res.json().catch(() => null) : null;
+    return { ok: res.ok, status: res.status, body };
+  } catch (err) {
+    console.error('fetchWithAuth error:', err);
+    return { ok: false, status: 0, body: null };
+  }
+}
+
+function updatePremiumStatus(userObj) {
+  const premiumStatusDiv = document.getElementById('premium-status');
+  const premiumBadge     = document.getElementById('premium-badge');
+  const premiumExpiry    = document.getElementById('premium-expiry');
+
+  if (!premiumStatusDiv || !premiumBadge || !premiumExpiry) return;
+
+  const status = userObj?.premium_status || 'none';
+  if (status === 'none' || !status) {
+    premiumStatusDiv.classList.add('hidden');
+    return;
+  }
+  premiumStatusDiv.classList.remove('hidden');
+
+  const isActive = Boolean(userObj?.has_valid_premium);
+
+  const STYLES = {
+    basic:   'text-green-700 bg-green-50 border-green-200',
+    premium: 'text-blue-700 bg-blue-50 border-blue-200',
+    max:     'text-purple-700 bg-purple-50 border-purple-200',
+    default: 'text-gray-700 bg-gray-50 border-gray-200'
+  };
+
+  const label =
+    status === 'basic'   ? 'Basic'   :
+    status === 'premium' ? 'Premium' :
+    status === 'max'     ? 'Max'     :
+    (status[0]?.toUpperCase() + status.slice(1));
+
+  const colorClass = STYLES[status] || STYLES.default;
+
+  premiumBadge.textContent = label + (isActive ? '' : ' (Expired)');
+  premiumBadge.className = `inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium border ${colorClass}`;
+
+  const expRaw = userObj?.premium_expires_at || userObj?.expires_at || null;
+  if (!expRaw) {
+    premiumExpiry.textContent = '• No expiry date';
+    premiumExpiry.className = 'text-sm text-anthropic-cloud-medium';
+    return;
+  }
+
+  const expDate = new Date(expRaw);
+  if (isNaN(expDate.getTime())) {
+    premiumExpiry.textContent = '• Invalid expiry date';
+    premiumExpiry.className = 'text-sm text-anthropic-cloud-medium';
+    return;
+  }
+
+  const now = new Date();
+  const diffDays = Math.ceil((expDate - now) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 0) {
+    premiumExpiry.textContent = `• Expires in ${diffDays} day${diffDays === 1 ? '' : 's'}`;
+    premiumExpiry.className = 'text-sm text-anthropic-cloud-medium';
+  } else if (diffDays === 0) {
+    premiumExpiry.textContent = '• Expires today';
+    premiumExpiry.className = 'text-sm text-orange-600 font-medium';
+  } else {
+    const d = Math.abs(diffDays);
+    premiumExpiry.textContent = `• Expired ${d} day${d === 1 ? '' : 's'} ago`;
+    premiumExpiry.className = 'text-sm text-red-600 font-medium';
+  }
+}
+
+function loadUserData(u) {
+  if (u && u.user) {
+    updatePremiumStatus(u.user);
+    updateSectorSelection(u.user);
+    updateChatCta(u.user);
+  }
+}
+
+function updateSectorSelection(userObj) {
+  const sectorSelectionDiv = document.getElementById('sector-selection');
+  const currentSectorSpan  = document.getElementById('current-sector');
+  const sectorSelect       = document.getElementById('sector-select');
+  const changeSectorBtn    = document.getElementById('change-sector-btn');
+  const sectorChangeInfo   = document.getElementById('sector-change-info');
+
+  if (userObj.premium_status !== 'basic') {
+    if (sectorSelectionDiv) sectorSelectionDiv.style.display = 'none';
+    updateCardStates(userObj);
+    return;
+  }
+
+  sectorSelectionDiv.style.display = 'block';
+  currentSectorSpan.textContent = userObj.selected_sector || 'None selected';
+
+  if (userObj.can_change_sector) {
+    changeSectorBtn.disabled = false;
+    changeSectorBtn.textContent = 'Change';
+    sectorChangeInfo.textContent = 'You can change your sector once per week';
+    sectorChangeInfo.className = 'text-xs text-anthropic-cloud-medium';
+  } else {
+    changeSectorBtn.disabled = true;
+    changeSectorBtn.textContent = 'Locked';
+    sectorChangeInfo.textContent = 'Sector change locked until next Monday';
+    sectorChangeInfo.className = 'text-xs text-orange-600';
+  }
+
+  updateCardStates(userObj);
+
+  sectorSelect.addEventListener('change', function () {
+    const v = this.value;
+    changeSectorBtn.disabled = !(v && v !== userObj.selected_sector && userObj.can_change_sector);
+  });
+
+  changeSectorBtn.addEventListener('click', function () {
+    const v = sectorSelect.value;
+    if (v && v !== userObj.selected_sector && userObj.can_change_sector) {
+      changeUserSector(v);
+    }
+  });
+}
+
+function updateCardStates(userObj) {
+  const cards = document.querySelectorAll('.album-card');
+
+  if (!userObj.premium_status || userObj.premium_status === 'none') {
+    cards.forEach(card => {
+      card.classList.add('locked');
+      card.onclick = null;
+      if (!card.querySelector('.lock-icon')) {
+        const i = document.createElement('div');
+        i.className = 'lock-icon';
+        i.innerHTML = `
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+          </svg>`;
+        card.appendChild(i);
+      }
+    });
+  } else if (userObj.premium_status === 'basic') {
+    cards.forEach(card => {
+      const sector_name = infer_sector_from_card(card);
+      const selected = userObj.selected_sector === sector_name;
+
+      if (selected) {
+        card.classList.remove('locked');
+        card.onclick = () => showRegionModal(sector_name);
+        const lock = card.querySelector('.lock-icon');
+        if (lock) lock.remove();
+      } else {
+        card.classList.add('locked');
+        card.onclick = null;
+        if (!card.querySelector('.lock-icon')) {
+          const i = document.createElement('div');
+          i.className = 'lock-icon';
+          i.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>`;
+          card.appendChild(i);
+        }
+      }
+    });
+  } else {
+    // premium & max — all unlocked
+    cards.forEach(card => {
+      const sector_name = infer_sector_from_card(card);
+      card.classList.remove('locked');
+      card.onclick = () => showRegionModal(sector_name);
+      const lock = card.querySelector('.lock-icon');
+      if (lock) lock.remove();
+    });
+  }
+}
+
+
+async function changeUserSector(newSector) {
+  try {
+    const res = await fetchWithAuth('/api/sector/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sector: newSector })
+    });
+
+    if (res && res.success) {
+      const currentSectorSpan = document.getElementById('current-sector');
+      const sectorSelect      = document.getElementById('sector-select');
+      const changeSectorBtn   = document.getElementById('change-sector-btn');
+      const sectorChangeInfo  = document.getElementById('sector-change-info');
+
+      currentSectorSpan.textContent = newSector;
+      sectorSelect.value = '';
+      changeSectorBtn.disabled = true;
+      changeSectorBtn.textContent = 'Locked';
+      sectorChangeInfo.textContent = 'Sector change locked until next Monday';
+      sectorChangeInfo.className = 'text-xs text-orange-600';
+
+      if (user) {
+        user.selected_sector = newSector;
+        user.can_change_sector = false;
+      }
+
+      updateCardStates(user);
+      alert(`Sector successfully changed to ${newSector}! You can change it again next Monday.`);
+    } else {
+      alert('Failed to change sector. Please try again.');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Error changing sector. Please try again.');
+  }
+}
+
+/* =========================================
+   Coverflow 2.0 (transform-only, looping)
+========================================= */
+let current_index  = 1;   // 1..N among real slides
+let real_cards     = [];  // real album-card nodes
+let track_el       = null; // #coverflow_track
+let viewport_el    = null; // #coverflow
+
+let step_queue     = 0;
+let is_animating   = false;
+let render_offset  = 0;
+let scroll_accum   = 0;
+
+function get_gap_px(container) {
+  const cs = getComputedStyle(container);
+  return parseFloat(cs.gap || cs.columnGap || '0') || 0;
+}
+function get_card_width(container) {
+  const c = container.querySelector('.album-card');
+  return c ? c.getBoundingClientRect().width : 320;
+}
+function get_stride(container) {
+  return get_card_width(container) + get_gap_px(container);
+}
+function stride_px() {
+  return get_stride(viewport_el);
+}
+function center_offset_px() {
+  const vw = viewport_el ? viewport_el.clientWidth : 0;
+  const cw = get_card_width(viewport_el);
+  return (vw - cw) / 2;
+}
+
+function optical_nudge_px() {
+  const vw = viewport_el ? viewport_el.clientWidth : window.innerWidth;
+
+  // Base % shift to the LEFT (negative), tuned per breakpoint.
+  // Slightly larger on small screens, lighter on big monitors.
+let pct =
+  vw <= 420  ? -0.102 : 
+  vw <= 640  ? -0.090 : 
+  vw <= 768  ? -0.078 : 
+  vw <= 1024 ? -0.066 : 
+  vw <= 1440 ? -0.054 : 
+               -0.045;  
+
+
+  // If arrows are hidden (e.g., on mobile), reduce the nudge a bit.
+  const left_btn  = document.getElementById('leftBtn');
+  const right_btn = document.getElementById('rightBtn');
+  const left_hidden  = !left_btn  || getComputedStyle(left_btn).display  === 'none';
+  const right_hidden = !right_btn || getComputedStyle(right_btn).display === 'none';
+  if (left_hidden && right_hidden) pct *= 0.6;
+
+  return pct * vw; // return pixels
+}
+
+function apply_transform(instant = false) {
+  if (!track_el) return;
+
+  const stride = stride_px();
+  const pad = center_offset_px();
+
+  track_el.style.paddingLeft  = `${pad}px`;
+  track_el.style.paddingRight = `${pad}px`;
+
+  const tx_core = -(current_index * stride);
+  const tx = tx_core + optical_nudge_px();
+
+  if (instant) track_el.style.transition = 'none';
+  track_el.style.transform = `translateX(${tx}px)`;
+  if (instant) {
+    void track_el.offsetHeight; // reflow
+    track_el.style.transition = '';
+  }
+}
+
+// pose cards (rotate/scale/opacity) around the visual center
+function updateCoverFlow() {
+  const albums = Array.from(document.querySelectorAll('#coverflow .album-card:not(.clone)'));
+  albums.forEach(a => a.classList.remove('active'));
+
+  const center_real_idx = Math.max(0, Math.min(albums.length - 1, current_index - 1));
+  const effective_center = center_real_idx + render_offset; // 0 at rest
+
+  albums.forEach((album, idx) => {
+    const offset = idx - effective_center;
+    const abs = Math.abs(offset);
+
+    if (abs < 0.001) {
+      album.style.transform = 'rotateY(0deg) scale(1)';
+      album.style.opacity = '1';
+      album.style.zIndex = '10';
+      album.classList.add('active');
+    } else {
+      const angle = Math.min(abs * 35, 60);
+      const scale = Math.max(0.7, 1 - abs * 0.15);
+      album.style.transform = `rotateY(${offset < 0 ? angle : -angle}deg) scale(${scale})`;
+      album.style.opacity = String(Math.max(0.5, 1 - abs * 0.2));
+      album.style.zIndex = String(10 - Math.min(9, abs));
+    }
+  });
+}
+
+function build_track() {
+  viewport_el = document.getElementById('coverflow');
+  track_el = document.getElementById('coverflow_track');
+  if (!viewport_el || !track_el) return;
+
+  const all = Array.from(track_el.querySelectorAll('.album-card'));
+  all.forEach(el => el.classList.remove('clone'));
+  real_cards = all.slice();
+
+  const first = real_cards[0];
+  const last  = real_cards[real_cards.length - 1];
+
+  track_el.innerHTML = '';
+
+  const clone_last  = last.cloneNode(true);  clone_last.classList.add('clone');
+  const clone_first = first.cloneNode(true); clone_first.classList.add('clone');
+
+  track_el.appendChild(clone_last);
+  real_cards.forEach(el => track_el.appendChild(el));
+  track_el.appendChild(clone_first);
+
+  // start centered on middle real card
+  const total = real_cards.length;
+  current_index = Math.ceil(total / 2);
+
+  apply_transform(true);
+  mark_active_and_pose();
+}
+
+function next_transition_end(duration_ms = 320) {
+  return new Promise(resolve => {
+    let settled = false;
+
+    const on_end = (e) => {
+      if (e.target !== track_el || e.propertyName !== 'transform') return;
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      track_el.removeEventListener('transitionend', on_end);
+      resolve();
+    };
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      track_el && track_el.removeEventListener('transitionend', on_end);
+      resolve();
+    }, Math.max(80, duration_ms + 120));
+
+    track_el && track_el.addEventListener('transitionend', on_end, { once: true });
+  });
+}
+
+function jump_if_on_clone() {
+  const total = real_cards.length;
+  if (current_index === 0) {
+    current_index = total;
+    apply_transform(true);
+  } else if (current_index === total + 1) {
+    current_index = 1;
+    apply_transform(true);
+  }
+}
+
+async function step(dir, duration_ms = 320) {
+  if (!track_el) return;
+
+  if (is_animating) {
+    step_queue += dir;
+    step_queue = Math.max(-5, Math.min(5, step_queue));
+    return;
+  }
+
+  is_animating = true;
+  track_el.classList.add('is-moving');
+  track_el.style.transitionDuration = `${duration_ms}ms`;
+
+  current_index += dir;
+  apply_transform(false);
+  await next_transition_end(duration_ms);
+
+  jump_if_on_clone();
+  render_offset = 0;
+  mark_active_and_pose();
+
+  is_animating = false;
+  track_el.classList.remove('is-moving');
+
+  run_queue();
+}
+
+function mark_active_and_pose() {
+  const active = real_cards[current_index - 1];
+  document
+    .querySelectorAll('#coverflow_track .album-card')
+    .forEach(el => el.classList.remove('active'));
+
+  if (active) active.classList.add('active');
+
+  render_offset = 0;
+  updateCoverFlow();
+}
+
+function run_queue() {
+  if (is_animating || step_queue === 0) return;
+
+  const dir = step_queue > 0 ? +1 : -1;
+  step_queue -= dir;
+
+  const duration_ms = Math.max(220, 320 - Math.min(3, Math.abs(step_queue)) * 40);
+  step(dir, duration_ms);
+}
+
+function attach_navigation_inputs() {
+  if (window.__CF_INPUTS_WIRED__) return;
+  window.__CF_INPUTS_WIRED__ = true;
+
+  let touch_active = false;
+  let sx = 0, sy = 0;
+
+  function on_pd(e) {
+    touch_active = true;
+    sx = e.clientX;
+    sy = e.clientY;
+  }
+
+  function on_pm(e) {
+    if (!touch_active) return;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    if (Math.abs(dx) > Math.abs(dy)) e.preventDefault();
+  }
+
+  function on_pu(e) {
+    if (!touch_active) return;
+    touch_active = false;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    if (Math.abs(dx) <= Math.abs(dy)) return;
+
+    const threshold = Math.max(30, stride_px() * 0.10);
+    const dir = dx > threshold ? -1 : dx < -threshold ? +1 : 0;
+    if (dir !== 0) {
+      step_queue = dir;             // replace, not accumulate
+      run_queue();                  // exactly one rotation
+    }
+  }
+
+  // listen on entire window so swipe-up always fires
+  viewport_el.addEventListener('pointerdown', on_pd, { passive: true });
+  viewport_el.addEventListener('pointermove', on_pm, { passive: false });
+  window.addEventListener('pointerup', on_pu, { passive: true });
+  window.addEventListener('pointercancel', () => { touch_active = false; }, { passive: true });
+
+  // remove duplicate keyboard handler first
+  document.removeEventListener('keydown', handle_arrow_keys);
+
+  function handle_arrow_keys(e) {
+    if (e.key === 'ArrowLeft')  navigateLeft();
+    if (e.key === 'ArrowRight') navigateRight();
+  }
+  document.addEventListener('keydown', handle_arrow_keys);
+
+  // arrow buttons (already correct)
+  const leftBtn  = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  if (leftBtn)  leftBtn.onclick  = null;
+  if (rightBtn) rightBtn.onclick = null;
+
+  if (leftBtn) {
+    leftBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      leftBtn.disabled = rightBtn ? (rightBtn.disabled = true) : true;
+      try { await navigateLeft(); }
+      finally {
+        leftBtn.disabled = false;
+        if (rightBtn) rightBtn.disabled = false;
+      }
+    });
+  }
+  if (rightBtn) {
+    rightBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      rightBtn.disabled = leftBtn ? (leftBtn.disabled = true) : true;
+      try { await navigateRight(); }
+      finally {
+        rightBtn.disabled = false;
+        if (leftBtn) leftBtn.disabled = false;
+      }
+    });
+  }
+}
+
+
+function navigateRight() {
+  step_queue += +1;
+  step_queue = Math.max(-5, Math.min(5, step_queue));
+  run_queue();
+}
+
+function navigateLeft() {
+  step_queue += -1;
+  step_queue = Math.max(-5, Math.min(5, step_queue));
+  run_queue();
+}
+
+// expose for inline references if any remain
+window.navigateLeft  = navigateLeft;
+window.navigateRight = navigateRight;
+
+/* =========================================
+   Region modal + PDF/TL;DR loader
+========================================= */
+function showRegionModal(sector, mode = 'brief') {
+  currentSector = sector;
+  currentOpenDoc = mode;
+  const m = document.getElementById('regionModal');
+  m.style.display = 'flex';
+  setTimeout(() => m.classList.add('modal-open'), 10);
+}
+
+function hideRegionModal() {
+  const m = document.getElementById('regionModal');
+  m.classList.remove('modal-open');
+  setTimeout(() => { m.style.display = 'none'; }, 300);
+}
+
+// click outside closes modal
+document.addEventListener('click', (e) => {
+  const m = document.getElementById('regionModal');
+  if (e.target === m) hideRegionModal();
+});
+
+function formatYMD(date) {
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+function getYMDOffset(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return formatYMD(d);
+}
+async function urlExists(u) {
+  try {
+    const r = await fetch(u, { method: 'HEAD', cache: 'no-store' });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}
+
+function regionCandidates(region) {
+  const r = (region || '').trim();
+  const set = new Set([r, r.toUpperCase()]);
+  if (/^europe$/i.test(r)) set.add('EU');
+  return Array.from(set).filter(Boolean);
+}
+function sectorCandidates(sector) {
+  const s = (sector || '').trim();
+  const out = new Set([s, s.toUpperCase()]);
+  if (/^industrial$/i.test(s)) { out.add('Industry'); out.add('INDUSTRY'); }
+  return Array.from(out).filter(Boolean);
+}
+
+function briefNameCandidates(region, sector, ymd) {
+  const files = [];
+  for (const R of regionCandidates(region)) {
+    for (const S of sectorCandidates(sector)) {
+      files.push(`${BRIEF_BASE}/${encodeURIComponent(R)}_${encodeURIComponent(S)}_Brief_${ymd}.pdf`);
+      files.push(`${BRIEF_BASE}/${encodeURIComponent(R)}_${encodeURIComponent(S)}_brief_${ymd}.pdf`);
+    }
+  }
+  return files;
+}
+function tldrNameCandidates(region, sector, ymd) {
+  const files = [];
+  for (const R of regionCandidates(region)) {
+    for (const S of sectorCandidates(sector)) {
+      files.push(`${TLDR_BASE}/${encodeURIComponent(R)}_${encodeURIComponent(S)}_TLDR_${ymd}.pdf`);
+      files.push(`${TLDR_BASE}/${encodeURIComponent(R)}_${encodeURIComponent(S)}_tldr_${ymd}.pdf`);
+    }
+  }
+  return files;
+}
+
+async function resolveExistingBriefUrl(region, sector, ymd) {
+  const c = briefNameCandidates(region, sector, ymd);
+  for (const u of c) {
+    try {
+      const r = await fetch(u, { method: 'HEAD', cache: 'no-store' });
+      if (r.ok) return u;
+    } catch {}
+  }
+  return c[0];
+}
+async function resolveExistingTldrUrl(region, sector, ymd) {
+  const c = tldrNameCandidates(region, sector, ymd);
+  for (const u of c) {
+    try {
+      const r = await fetch(u, { method: 'HEAD', cache: 'no-store' });
+      if (r.ok) return u;
+    } catch {}
+  }
+  return c[0];
+}
+
+function showLoadingAnimation() {
+  const o = document.getElementById('loadingOverlay');
+  if (!o) return;
+  o.classList.remove('hidden');
+  o.style.display = 'flex';
+  o.style.opacity = '0';
+  setTimeout(() => { o.style.opacity = '1'; }, 10);
+}
+function hideLoadingAnimation() {
+  const o = document.getElementById('loadingOverlay');
+  if (!o) return;
+  o.style.opacity = '0';
+  setTimeout(() => {
+    o.classList.add('hidden');
+    o.style.display = 'none';
+  }, 300);
+}
+
+function renderReportInfoCard(sector, region, dateYmd) {
+  const META = {
+    TMT:        { title: 'TMT DECK',        subtitle: 'Technology, Media & Telecom Reports',   description: 'Draw insights from innovation trends',       colorClass: 'bg-anthropic-manila',   textColorClass: 'text-anthropic-slate' },
+    Energy:     { title: 'ENERGY DECK',     subtitle: 'Oil, Gas & Renewables Reports',         description: 'Draw insights from power markets',           colorClass: 'bg-anthropic-terracotta', textColorClass: 'text-white' },
+    Healthcare: { title: 'HEALTHCARE DECK', subtitle: 'Pharma, Biotech & Devices Reports',     description: 'Draw insights from life sciences',           colorClass: 'bg-custom-sage-green',     textColorClass: 'text-anthropic-slate' },
+    Consumer:   { title: 'CONSUMER DECK',   subtitle: 'Retail, Brands & Lifestyle Reports',     description: 'Draw insights from market trends',           colorClass: 'bg-anthropic-ivory-dark', textColorClass: 'text-anthropic-slate' },
+    Industry:   { title: 'INDUSTRY DECK',   subtitle: 'Manufacturing & Infrastructure Reports', description: 'Draw insights from heavy industry',          colorClass: 'bg-custom-soft-lavender', textColorClass: 'text-anthropic-slate' }
+  };
+  const info = META[sector] || {
+    title: `${sector} DECK`,
+    subtitle: 'Sector Reports',
+    description: '',
+    colorClass: 'bg-white',
+    textColorClass: 'text-anthropic-slate'
+  };
+
+  const card = document.getElementById('reportInfoCard');
+  if (!card) return;
+
+  card.innerHTML = `
+    <div class="h-full ${info.colorClass} card-deck-content p-8 flex flex-col justify-between">
+      <div class="flex-1"></div>
+      <div class="text-center">
+        <div class="text-3xl font-bold ${info.textColorClass} mb-2">${info.title}</div>
+        <div class="text-base ${info.textColorClass}/90 font-regular">${info.subtitle}</div>
+        <div class="text-sm ${info.textColorClass}/70 font-light mt-2">${info.description}</div>
+        <div class="mt-4 text-xs ${info.textColorClass}/60">
+          ${(region && region.trim()) ? region : 'Global'} • ${dateYmd}
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateTldrSwitch(mode) {
+  const btn = document.getElementById('tldrSwitchBtn');
+  if (!btn) return;
+
+  btn.classList.remove('hidden');
+
+  if (mode === 'brief') {
+    btn.innerHTML = '&rarr; AlphaStreet BOT <span class="opacity-70">(TL;DR)</span>';
+    btn.onclick = () => switchToTldr();
+  } else {
+    btn.textContent = 'Back to Full Brief';
+    btn.onclick = () => switchToFullBrief();
+  }
+}
+
+function applyMobileOverlayMode() {
+  const overlay = document.getElementById('pdfPreviewOverlay');
+  if (!overlay) return;
+  const isMobile = window.innerWidth <= 640;
+  overlay.classList.toggle('mobile-compact', isMobile);
+}
+
+function openTldrRegionPicker() {
+  showRegionModal(current_sector(), 'tldr');
+}
+
+function selectRegion(region) {
+  currentRegion = region;
+  hideRegionModal();
+  showLoadingAnimation();
+  if (currentOpenDoc === 'tldr') {
+    open_tldr_today(currentSector, region);
+  } else {
+    open_pdf_today(currentSector, region);
+  }
+}
+
+function switchToTldr() {
+  const frame = document.getElementById('pdfViewer');
+  if (frame) {
+    frame.classList.remove('pdf-viewer-normal');
+    frame.classList.add('pdf-viewer-blur');
+  }
+  showLoadingAnimation();
+  open_tldr_today(currentSector, currentRegion);
+}
+
+function switchToFullBrief() {
+  const frame = document.getElementById('pdfViewer');
+  if (frame) {
+    frame.classList.remove('pdf-viewer-normal');
+    frame.classList.add('pdf-viewer-blur');
+  }
+  showLoadingAnimation();
+  open_pdf_today(currentSector, currentRegion);
+}
+
+async function open_tldr_today(sector, region) {
+  currentOpenDoc = 'tldr';
+
+  let date = getYMDOffset(0);
+  let url  = await resolveExistingTldrUrl(region, sector, date);
+  let pdfExists = await urlExists(url);
+
+  // If today's TL;DR doesn't exist, check the last 7 days
+  if (!pdfExists) {
+    for (let i = 1; i <= 7; i++) {
+      const checkDate = getYMDOffset(-i);
+      const checkUrl = await resolveExistingTldrUrl(region, sector, checkDate);
+      if (await urlExists(checkUrl)) {
+        date = checkDate;
+        url = checkUrl;
+        pdfExists = true;
+        break;
+      }
+    }
+  }
+
+  updateTldrSwitch('tldr');
+  renderReportInfoCard(sector, region, `${date} • TL;DR`);
+
+  const overlay = document.getElementById('pdfPreviewOverlay');
+  const iframe  = document.getElementById('pdfViewer');
+  if (!overlay || !iframe) return;
+
+  applyMobileOverlayMode();
+
+  // Show error message if PDF doesn't exist
+  if (!pdfExists) {
+    iframe.src = '';
+    iframe.style.display = 'none';
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'pdfError';
+    errorDiv.className = 'w-full h-full flex items-center justify-center p-8';
+    errorDiv.innerHTML = `
+      <div class="text-center">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-4 text-anthropic-cloud-medium">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3 class="text-xl font-medium text-anthropic-slate mb-2">TL;DR Not Available</h3>
+        <p class="text-sm text-anthropic-cloud-dark mb-4">The TL;DR for ${region} ${sector} is not available yet.</p>
+        <p class="text-xs text-anthropic-cloud-medium">Please try a different region or check back later.</p>
+      </div>
+    `;
+    const pdfContainer = iframe.parentElement;
+    const existingError = pdfContainer.querySelector('#pdfError');
+    if (existingError) existingError.remove();
+    pdfContainer.appendChild(errorDiv);
+  } else {
+    // Remove any existing error message
+    const existingError = iframe.parentElement.querySelector('#pdfError');
+    if (existingError) existingError.remove();
+    iframe.style.display = 'block';
+    iframe.src = url;
+  }
+
+  overlay.classList.remove('hidden');
+  overlay.style.opacity = '0';
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+  if (pdfExists) {
+    iframe.onload = function () {
+      hideLoadingAnimation();
+      iframe.classList.remove('pdf-viewer-blur');
+      iframe.classList.add('pdf-viewer-normal');
+    };
+    iframe.onerror = function () {
+      hideLoadingAnimation();
+      iframe.style.display = 'none';
+      const errorDiv = document.createElement('div');
+      errorDiv.id = 'pdfError';
+      errorDiv.className = 'w-full h-full flex items-center justify-center p-8';
+      errorDiv.innerHTML = `
+        <div class="text-center">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-4 text-anthropic-cloud-medium">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <h3 class="text-xl font-medium text-anthropic-slate mb-2">Failed to Load TL;DR</h3>
+          <p class="text-sm text-anthropic-cloud-dark mb-4">There was an error loading the TL;DR report.</p>
+          <p class="text-xs text-anthropic-cloud-medium">Please try again or contact support.</p>
+        </div>
+      `;
+      const pdfContainer = iframe.parentElement;
+      const existingError = pdfContainer.querySelector('#pdfError');
+      if (existingError) existingError.remove();
+      pdfContainer.appendChild(errorDiv);
+    };
+  } else {
+    hideLoadingAnimation();
+  }
+
+  const esc = (e) => (e.key === 'Escape') && closePDFPreview();
+  document.addEventListener('keydown', esc, { once: true });
+}
+
+async function open_pdf_today(sector, region) {
+  currentOpenDoc = 'brief';
+
+  let date = getYMDOffset(0);
+  let url  = await resolveExistingBriefUrl(region, sector, date);
+  let pdfExists = await urlExists(url);
+
+  // If today's PDF doesn't exist, check the last 7 days
+  if (!pdfExists) {
+    for (let i = 1; i <= 7; i++) {
+      const checkDate = getYMDOffset(-i);
+      const checkUrl = await resolveExistingBriefUrl(region, sector, checkDate);
+      if (await urlExists(checkUrl)) {
+        date = checkDate;
+        url = checkUrl;
+        pdfExists = true;
+        break;
+      }
+    }
+  }
+
+  renderReportInfoCard(sector, region, date);
+  updateTldrSwitch('brief');
+
+  const overlay = document.getElementById('pdfPreviewOverlay');
+  const iframe  = document.getElementById('pdfViewer');
+  if (!overlay || !iframe) return;
+
+  applyMobileOverlayMode();
+
+  // Show error message if PDF doesn't exist
+  if (!pdfExists) {
+    iframe.src = '';
+    iframe.style.display = 'none';
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'pdfError';
+    errorDiv.className = 'w-full h-full flex items-center justify-center p-8';
+    errorDiv.innerHTML = `
+      <div class="text-center">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-4 text-anthropic-cloud-medium">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3 class="text-xl font-medium text-anthropic-slate mb-2">Report Not Available</h3>
+        <p class="text-sm text-anthropic-cloud-dark mb-4">The report for ${region} ${sector} is not available yet.</p>
+        <p class="text-xs text-anthropic-cloud-medium">Please try a different region or check back later.</p>
+      </div>
+    `;
+    const pdfContainer = iframe.parentElement;
+    const existingError = pdfContainer.querySelector('#pdfError');
+    if (existingError) existingError.remove();
+    pdfContainer.appendChild(errorDiv);
+  } else {
+    // Remove any existing error message
+    const existingError = iframe.parentElement.querySelector('#pdfError');
+    if (existingError) existingError.remove();
+    iframe.style.display = 'block';
+    iframe.src = url;
+  }
+
+  overlay.classList.remove('hidden');
+  overlay.style.opacity = '0';
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+  if (pdfExists) {
+    iframe.onload = function () {
+      hideLoadingAnimation();
+      iframe.classList.remove('pdf-viewer-blur');
+      iframe.classList.add('pdf-viewer-normal');
+    };
+    iframe.onerror = function () {
+      hideLoadingAnimation();
+      iframe.style.display = 'none';
+      const errorDiv = document.createElement('div');
+      errorDiv.id = 'pdfError';
+      errorDiv.className = 'w-full h-full flex items-center justify-center p-8';
+      errorDiv.innerHTML = `
+        <div class="text-center">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-4 text-anthropic-cloud-medium">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <h3 class="text-xl font-medium text-anthropic-slate mb-2">Failed to Load Report</h3>
+          <p class="text-sm text-anthropic-cloud-dark mb-4">There was an error loading the PDF report.</p>
+          <p class="text-xs text-anthropic-cloud-medium">Please try again or contact support.</p>
+        </div>
+      `;
+      const pdfContainer = iframe.parentElement;
+      const existingError = pdfContainer.querySelector('#pdfError');
+      if (existingError) existingError.remove();
+      pdfContainer.appendChild(errorDiv);
+    };
+  } else {
+    hideLoadingAnimation();
+  }
+
+  const esc = (e) => (e.key === 'Escape') && closePDFPreview();
+  document.addEventListener('keydown', esc, { once: true });
+}
+
+function closePDFPreview() {
+  const overlay = document.getElementById('pdfPreviewOverlay');
+  const iframe  = document.getElementById('pdfViewer');
+  const btn     = document.getElementById('tldrSwitchBtn');
+
+  if (!overlay || !iframe) return;
+
+  if (btn) btn.classList.add('hidden');
+
+  // Remove any error messages
+  const pdfContainer = iframe.parentElement;
+  const errorDiv = pdfContainer.querySelector('#pdfError');
+  if (errorDiv) errorDiv.remove();
+  iframe.style.display = 'block';
+
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    iframe.src = '';
+  }, 300);
+}
+
+// current sector derived from DOM order — keep this array
+// in the same order as your real cards appear in the HTML:
+function current_sector() {
+  const order = ['Healthcare', 'Energy', 'TMT', 'Consumer', 'Industry'];
+  return order[(current_index - 1 + order.length) % order.length];
+}
+
+function infer_sector_from_card(card) {
+  const tid = (card.getAttribute('data-testid') || '').toLowerCase(); // e.g. "album-tmt"
+  if (tid.startsWith('album-')) {
+    const key = tid.slice(6); // "tmt", "energy", ...
+    if (key === 'tmt') return 'TMT';
+    // capitalize first letter for others
+    return key.charAt(0).toUpperCase() + key.slice(1);
+  }
+  // fallback: try title text if ever needed
+  const title = card.querySelector('.text-3xl')?.textContent || '';
+  if (/TMT/i.test(title)) return 'TMT';
+  if (/Energy/i.test(title)) return 'Energy';
+  if (/Health/i.test(title)) return 'Healthcare';
+  if (/Consumer/i.test(title)) return 'Consumer';
+  if (/Industry/i.test(title)) return 'Industry';
+  return null;
+}
+
+
+/* =========================================
+   Page init
+========================================= */
+window.addEventListener('DOMContentLoaded', async () => {
+  // Auth gate
+  const user_resp = await fetchWithAuth('/api/auth/user');
+  const auth_user = normalizeUser(user_resp);
+  if (!auth_user) {
+    window.location.href = '/api/login';
+    return;
+  }
+  user = auth_user;
+  loadUserData({ user: auth_user });
+
+  // Build coverflow track and inputs
+  build_track();
+  attach_navigation_inputs();
+  updateCoverFlow();
+
+  // Dashboard extras (optional)
+  try {
+    const dashboard_resp = await fetchWithAuth('/api/dashboard/all');
+    const dashboard = dashboard_resp?.body || null;
+    const dash_user = normalizeUser(dashboard);
+    if (dash_user) {
+      user = dash_user;
+      updatePremiumStatus(dash_user);
+      updateSectorSelection(dash_user);
+      updateChatCta(dash_user);
+    }
+  } catch (e) {
+    console.warn('dashboard fetch failed', e);
+  }
+
+  // keep transforms responsive
+  window.addEventListener('resize', () => {
+    setTimeout(() => {
+      apply_transform(true);
+      updateCoverFlow();
+      applyMobileOverlayMode();
+    }, 50);
+  });
+});
+
+function openTmtBot() {
+  // change the path if your chat is mounted elsewhere
+  window.location.href = '/ai-chat-select?region=global';
+}
+
+function logout() {
+  fetch('/api/logout', {
+    method: 'POST',
+    credentials: 'include'
+  }).then(() => {
+    window.location.href = '/';
+  }).catch(error => {
+    console.error('Logout error:', error);
+    window.location.href = '/';
+  });
+}
+
+function updateChatCta(userObj) {
+  const chat_btn = document.getElementById('chat-button');
+  const purchase_btn = document.getElementById('purchase-button');
+  if (!chat_btn || !purchase_btn) return;
+
+  // treat has_valid_premium as the source of truth; fallback to plan name
+  const has_premium =
+    Boolean(userObj?.has_valid_premium) ||
+    ['premium', 'max'].includes(userObj?.premium_status);
+
+  if (has_premium) {
+    chat_btn.classList.remove('hidden');
+    purchase_btn.classList.add('hidden');
+  } else {
+    chat_btn.classList.add('hidden');
+    purchase_btn.classList.remove('hidden');
+  }
+}
+
+/* =========================================
+   Bank Deals Modal
+========================================= */
+
+// Bank deals mapped based on advisor information
+const bankDeals = {
+  "GoldmanSachs": [
+    {
+      dealName: "Synthon & Goldman Sachs Asset Management Acquisition",
+      dealValue: "$2.2B",
+      date: "2024",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Synthon_and_Goldman_Sachs_Asset_Management_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Square & Afterpay Acquisition",
+      dealValue: "$29.0B",
+      date: "2021-08-01",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Square_and_Afterpay_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Rivian Automotive IPO",
+      dealValue: "$100B+",
+      date: "2021-11-10",
+      type: "IPO",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Rivian_Automotive_IPO_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Bristol-Myers Squibb & Celgene Acquisition",
+      dealValue: "$74.0B",
+      date: "2019-01-03",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Bristol-Myers_Squibb_and_Celgene_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Amcor & Berry Global Merger",
+      dealValue: "Scrip Merger",
+      date: "2022-08",
+      type: "Merger",
+      sector: "Industry",
+      pdfPath: "/static/assets/Research/Amcor_and_Berry_Global_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "JPMorgan": [
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Rivian Automotive IPO",
+      dealValue: "$100B+",
+      date: "2021-11-10",
+      type: "IPO",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Rivian_Automotive_IPO_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Bristol-Myers Squibb & Celgene Acquisition",
+      dealValue: "$74.0B",
+      date: "2019-01-03",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Bristol-Myers_Squibb_and_Celgene_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "MorganStanley": [
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Rivian Automotive IPO",
+      dealValue: "$100B+",
+      date: "2021-11-10",
+      type: "IPO",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Rivian_Automotive_IPO_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Square & Afterpay Acquisition",
+      dealValue: "$29.0B",
+      date: "2021-08-01",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Square_and_Afterpay_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Bristol-Myers Squibb & Celgene Acquisition",
+      dealValue: "$74.0B",
+      date: "2019-01-03",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Bristol-Myers_Squibb_and_Celgene_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Microsoft & Nuance Acquisition",
+      dealValue: "$19.7B",
+      date: "2021-04-12",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Microsoft_and_Nuance_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Siemens Energy & Siemens Gamesa Takeover",
+      dealValue: "$4.1B",
+      date: "2025-10-17",
+      type: "Takeover",
+      sector: "Energy",
+      pdfPath: "/static/assets/Research/Siemens_Energy_and_Siemens_Gamesa_Takeover_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Norfolk Southern & Union Pacific Railroad Merger",
+      dealValue: "$85.0B",
+      date: "2025-07-16",
+      type: "Merger",
+      sector: "Industry",
+      pdfPath: "/static/assets/Research/Norfolk_Southern_and_Union_Pacific_Railroad_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "Barclays": [
+    {
+      dealName: "Synthon & Goldman Sachs Asset Management Acquisition",
+      dealValue: "$2.2B",
+      date: "2024",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Synthon_and_Goldman_Sachs_Asset_Management_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Alaska Airlines & Hawaiian Airlines Merger",
+      dealValue: "$2.8B",
+      date: "2023-12-03",
+      type: "Merger",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Alaska_Airlines_and_Hawaiian_Airlines_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "BankOfAmerica": [
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Cinven & Bayer Environmental Science Acquisition",
+      dealValue: "$2.6B",
+      date: "2022",
+      type: "Acquisition",
+      sector: "Energy",
+      pdfPath: "/static/assets/Research/Cinven_and_Bayer_Environmental_Science_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Volkswagen & Europcar Acquisition",
+      dealValue: "$3.2B",
+      date: "2022-06-15",
+      type: "Acquisition",
+      sector: "Consumer",
+      pdfPath: "/static/assets/Research/Volkswagen_and_Europcar_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Alaska Airlines & Hawaiian Airlines Merger",
+      dealValue: "$2.8B",
+      date: "2023-12-03",
+      type: "Merger",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Alaska_Airlines_and_Hawaiian_Airlines_Merger_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Norfolk Southern & Union Pacific Railroad Merger",
+      dealValue: "$85.0B",
+      date: "2025-07-16",
+      type: "Merger",
+      sector: "Industry",
+      pdfPath: "/static/assets/Research/Norfolk_Southern_and_Union_Pacific_Railroad_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "Citi": [
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Bristol-Myers Squibb & Celgene Acquisition",
+      dealValue: "$74.0B",
+      date: "2019-01-03",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Bristol-Myers_Squibb_and_Celgene_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "UBS": [
+    {
+      dealName: "Amcor & Berry Global Merger",
+      dealValue: "Scrip Merger",
+      date: "2022-08",
+      type: "Merger",
+      sector: "Industry",
+      pdfPath: "/static/assets/Research/Amcor_and_Berry_Global_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "DeutscheBank": [],
+  "Evercore": [
+    {
+      dealName: "Microsoft & Nuance Acquisition",
+      dealValue: "$19.7B",
+      date: "2021-04-12",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Microsoft_and_Nuance_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Bristol-Myers Squibb & Celgene Acquisition",
+      dealValue: "$74.0B",
+      date: "2019-01-03",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Bristol-Myers_Squibb_and_Celgene_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "Jefferies": [
+    {
+      dealName: "Synthon & Goldman Sachs Asset Management Acquisition",
+      dealValue: "$2.2B",
+      date: "2024",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Synthon_and_Goldman_Sachs_Asset_Management_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "WellsFargo": [
+    {
+      dealName: "Broadcom & VMware Acquisition",
+      dealValue: "$84.2B",
+      date: "2023-11-22",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Broadcom_and_VMware_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Rivian Automotive IPO",
+      dealValue: "$100B+",
+      date: "2021-11-10",
+      type: "IPO",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Rivian_Automotive_IPO_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Amcor & Berry Global Merger",
+      dealValue: "Scrip Merger",
+      date: "2022-08",
+      type: "Merger",
+      sector: "Industry",
+      pdfPath: "/static/assets/Research/Amcor_and_Berry_Global_Merger_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Norfolk Southern & Union Pacific Railroad Merger",
+      dealValue: "$85.0B",
+      date: "2025-07-16",
+      type: "Merger",
+      sector: "Industry",
+      pdfPath: "/static/assets/Research/Norfolk_Southern_and_Union_Pacific_Railroad_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "CenterviewPartners": [
+    {
+      dealName: "Pfizer & Seagen Acquisition",
+      dealValue: "$43.0B",
+      date: "2023-12-14",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Pfizer_and_Seagen_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    },
+    {
+      dealName: "Oracle & Cerner Acquisition",
+      dealValue: "$28.3B",
+      date: "2021-12-20",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Oracle_and_Cerner_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "Guggenheim": [
+    {
+      dealName: "Pfizer & Seagen Acquisition",
+      dealValue: "$43.0B",
+      date: "2023-12-14",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Pfizer_and_Seagen_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "PJTPartners": [
+    {
+      dealName: "Alaska Airlines & Hawaiian Airlines Merger",
+      dealValue: "$2.8B",
+      date: "2023-12-03",
+      type: "Merger",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Alaska_Airlines_and_Hawaiian_Airlines_Merger_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "Moelis": [
+    {
+      dealName: "Bristol-Myers Squibb & Celgene Acquisition",
+      dealValue: "$74.0B",
+      date: "2019-01-03",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Bristol-Myers_Squibb_and_Celgene_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "PerellaWeinberg": [
+    {
+      dealName: "Siemens Energy & Siemens Gamesa Takeover",
+      dealValue: "$4.1B",
+      date: "2025-10-17",
+      type: "Takeover",
+      sector: "Energy",
+      pdfPath: "/static/assets/Research/Siemens_Energy_and_Siemens_Gamesa_Takeover_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "QatalystPartners": [
+    {
+      dealName: "Square & Afterpay Acquisition",
+      dealValue: "$29.0B",
+      date: "2021-08-01",
+      type: "Acquisition",
+      sector: "TMT",
+      pdfPath: "/static/assets/Research/Square_and_Afterpay_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ],
+  "Rothschild": [
+    {
+      dealName: "Synthon & Goldman Sachs Asset Management Acquisition",
+      dealValue: "$2.2B",
+      date: "2024",
+      type: "Acquisition",
+      sector: "Healthcare",
+      pdfPath: "/static/assets/Research/Synthon_and_Goldman_Sachs_Asset_Management_Acquisition_Deal_Analysis_2025-10-17.pdf"
+    }
+  ]
+};
+
+// Bank metadata (names and logo paths)
+const bankMetadata = {
+  "GoldmanSachs": {
+    name: "Goldman Sachs",
+    logo: "/static/assets/images/GoldmanSachs.jpg"
+  },
+  "JPMorgan": {
+    name: "J.P. Morgan",
+    logo: "/static/assets/images/JPMorgan.jpg"
+  },
+  "MorganStanley": {
+    name: "Morgan Stanley",
+    logo: "/static/assets/images/MorganStanley.jpg"
+  },
+  "Barclays": {
+    name: "Barclays",
+    logo: "/static/assets/images/Barclays.jpg"
+  },
+  "BankOfAmerica": {
+    name: "Bank of America",
+    logo: "/static/assets/images/BankOfAmerica.jpg"
+  },
+  "Citi": {
+    name: "Citibank",
+    logo: "/static/assets/images/Citi.jpg"
+  },
+  "UBS": {
+    name: "UBS",
+    logo: "/static/assets/images/UBS.jpg"
+  },
+  "DeutscheBank": {
+    name: "Deutsche Bank",
+    logo: "/static/assets/images/DeutscheBank.jpg"
+  },
+  "Evercore": {
+    name: "Evercore",
+    logo: "/static/assets/images/Evercore_logo.jpg"
+  },
+  "Jefferies": {
+    name: "Jefferies",
+    logo: "/static/assets/images/Jefferies.jpg"
+  },
+  "WellsFargo": {
+    name: "Wells Fargo",
+    logo: "/static/assets/images/Wells_Fargo_logo.jpg"
+  },
+  "CenterviewPartners": {
+    name: "Centerview Partners",
+    logo: "/static/assets/images/CenterviewPartners.jpg"
+  },
+  "Guggenheim": {
+    name: "Guggenheim",
+    logo: "/static/assets/images/Guggenheim.jpg"
+  },
+  "PJTPartners": {
+    name: "PJT Partners",
+    logo: "/static/assets/images/PJT.jpg"
+  },
+  "Moelis": {
+    name: "Moelis",
+    logo: "/static/assets/images/Moelis_logo.jpg"
+  },
+  "PerellaWeinberg": {
+    name: "Perella Weinberg Partners",
+    logo: "/static/assets/images/PWP.jpg"
+  },
+  "QatalystPartners": {
+    name: "Qatalyst Partners",
+    logo: "/static/assets/images/Qatalyst.jpg"
+  },
+  "Rothschild": {
+    name: "Rothschild & Co",
+    logo: "/static/assets/images/RothchildAndCo.jpg"
+  }
+};
+
+function formatDealValue(value) {
+  // Already formatted in mock data, but this can be used for future formatting
+  return value || "N/A";
+}
+
+function formatDate(dateString) {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function renderBankDeals(bankName, deals) {
+  const dealsList = document.getElementById('bankDealsList');
+  if (!dealsList) return;
+
+  if (!deals || deals.length === 0) {
+    dealsList.innerHTML = `
+      <div class="text-center py-16">
+        <p class="text-anthropic-cloud-medium font-light text-sm tracking-wide">No deals available for this bank.</p>
+      </div>
+    `;
+    return;
+  }
+
+  dealsList.innerHTML = deals.map(deal => `
+    <div class="deal-item py-5 px-1 hover:bg-anthropic-ivory/30 transition-all duration-300 cursor-pointer border-b border-anthropic-cloud-light/20 hover:border-anthropic-cloud-medium/40 last:border-b-0"
+         onclick="viewDealPDF('${deal.pdfPath}')">
+      <div class="flex items-start justify-between">
+        <div class="flex-1 pr-6">
+          <h3 class="text-base font-light text-anthropic-slate mb-3 leading-relaxed tracking-wide">${deal.dealName}</h3>
+          <div class="flex flex-wrap items-center gap-5 text-xs font-light">
+            <span class="flex items-center text-anthropic-cloud-medium">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mr-1.5 opacity-60">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              ${formatDate(deal.date)}
+            </span>
+            <span class="text-anthropic-cloud-medium">
+              ${deal.type}
+            </span>
+            <span class="text-anthropic-cloud-medium">
+              ${deal.sector}
+            </span>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div class="text-xl font-light text-anthropic-cloud-dark tracking-wide">${formatDealValue(deal.dealValue)}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openBankDeals(bankName) {
+  const modal = document.getElementById('bankDealsModal');
+  const bankNameEl = document.getElementById('bankDealsName');
+  const bankLogoEl = document.getElementById('bankDealsLogo');
+  const bankCountEl = document.getElementById('bankDealsCount');
+  
+  if (!modal || !bankNameEl || !bankLogoEl || !bankCountEl) return;
+
+  const metadata = bankMetadata[bankName];
+  const deals = bankDeals[bankName] || [];
+
+  // Set bank info
+  bankNameEl.textContent = metadata?.name || bankName;
+  bankLogoEl.src = metadata?.logo || '';
+  bankLogoEl.alt = metadata?.name || bankName;
+  bankCountEl.textContent = `${deals.length} ${deals.length === 1 ? 'deal' : 'deals'} analyzed`;
+
+  // Render deals
+  renderBankDeals(bankName, deals);
+
+  // Show modal
+  modal.classList.remove('hidden');
+  modal.style.opacity = '0';
+  requestAnimationFrame(() => {
+    modal.style.opacity = '1';
+  });
+
+  // Close on Escape key
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeBankDeals();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+}
+
+function closeBankDeals() {
+  const modal = document.getElementById('bankDealsModal');
+  if (!modal) return;
+
+  modal.style.opacity = '0';
+  setTimeout(() => {
+    modal.classList.add('hidden');
+  }, 300);
+}
+
+function viewDealPDF(pdfPath) {
+  // Placeholder for future PDF viewer integration
+  // For now, open in new tab
+  if (pdfPath) {
+    window.open(pdfPath, '_blank');
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('bankDealsModal');
+  if (e.target === modal) {
+    closeBankDeals();
+  }
+});
+</script>
+
+
+    <!-- Region Selection Modal -->
+    <div id="regionModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-md flex items-center justify-center z-50 opacity-0 transition-opacity duration-300" style="display: none;">
+        <div class="flex items-center space-x-12">
+            <!-- US Flag -->
+            <button onclick="selectRegion('US')" class="group text-center p-6 hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-200">
+                <div class="w-20 h-12 mx-auto mb-3 rounded overflow-hidden">
+                    <svg viewBox="0 0 60 40" class="w-full h-full">
+                        <rect width="60" height="40" fill="#B22234"/>
+                        <rect y="3" width="60" height="3" fill="#FFFFFF"/>
+                        <rect y="9" width="60" height="3" fill="#FFFFFF"/>
+                        <rect y="15" width="60" height="3" fill="#FFFFFF"/>
+                        <rect y="21" width="60" height="3" fill="#FFFFFF"/>
+                        <rect y="27" width="60" height="3" fill="#FFFFFF"/>
+                        <rect y="33" width="60" height="3" fill="#FFFFFF"/>
+                        <rect width="24" height="21" fill="#3C3B6E"/>
+                        <g fill="white">
+                            <circle cx="4" cy="4" r="0.7"/>
+                            <circle cx="8" cy="4" r="0.7"/>
+                            <circle cx="12" cy="4" r="0.7"/>
+                            <circle cx="16" cy="4" r="0.7"/>
+                            <circle cx="20" cy="4" r="0.7"/>
+                            <circle cx="6" cy="7" r="0.7"/>
+                            <circle cx="10" cy="7" r="0.7"/>
+                            <circle cx="14" cy="7" r="0.7"/>
+                            <circle cx="18" cy="7" r="0.7"/>
+                            <circle cx="4" cy="10" r="0.7"/>
+                            <circle cx="8" cy="10" r="0.7"/>
+                            <circle cx="12" cy="10" r="0.7"/>
+                            <circle cx="16" cy="10" r="0.7"/>
+                            <circle cx="20" cy="10" r="0.7"/>
+                        </g>
+                    </svg>
+    </div>
+                <div class="text-white text-lg font-medium group-hover:text-white">United States</div>
+            </button>
+
+            <!-- EU Flag -->
+            <button onclick="selectRegion('Europe')" class="group text-center p-6 hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-200">
+                <div class="w-20 h-12 mx-auto mb-3 rounded overflow-hidden">
+                    <svg viewBox="0 0 60 40" class="w-full h-full">
+                        <rect width="60" height="40" fill="#003399"/>
+                        <g fill="#FFCC00">
+                            <circle cx="30" cy="8" r="1"/>
+                            <circle cx="36" cy="10" r="1"/>
+                            <circle cx="40" cy="16" r="1"/>
+                            <circle cx="40" cy="24" r="1"/>
+                            <circle cx="36" cy="30" r="1"/>
+                            <circle cx="30" cy="32" r="1"/>
+                            <circle cx="24" cy="30" r="1"/>
+                            <circle cx="20" cy="24" r="1"/>
+                            <circle cx="20" cy="16" r="1"/>
+                            <circle cx="24" cy="10" r="1"/>
+                            <circle cx="30" cy="14" r="1"/>
+                            <circle cx="30" cy="26" r="1"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="text-white text-lg font-medium group-hover:text-white">Europe</div>
+            </button>
+
+            <!-- APAC Flag -->
+            <button onclick="selectRegion('APAC')" class="group text-center p-6 hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-200">
+                <div class="w-20 h-12 mx-auto mb-3 rounded overflow-hidden">
+                    <svg viewBox="0 0 60 40" class="w-full h-full" aria-label="Flag of Singapore">
+                        <!-- Bands -->
+                        <rect width="60" height="20" y="0" fill="#ED2939"/>
+                        <rect width="60" height="20" y="20" fill="#FFFFFF"/>
+
+                        <!-- Correct crescent (opens right) -->
+                        <circle cx="16" cy="10" r="7" fill="#FFFFFF"/>
+                        <circle cx="18.5" cy="10" r="7" fill="#ED2939"/>
+
+                        <!-- 5-point star symbol -->
+                        <symbol id="sg_star" viewBox="-10 -10 20 20">
+                            <path fill="#FFFFFF"
+                            d="M0,-9 L2.351,-2.809 L9.511,-2.809 L3.58,1.073 L5.878,8.145 
+                                L0,4.5 L-5.878,8.145 L-3.58,1.073 L-9.511,-2.809 L-2.351,-2.809 Z"/>
+                        </symbol>
+
+                        <!-- 5 stars in a pentagon pattern -->
+                        <g>
+                            <use xlink:href="#sg_star" transform="translate(28,4) scale(0.19)"/>
+                            <use xlink:href="#sg_star" transform="translate(33.7,8.15) scale(0.19)"/>
+                            <use xlink:href="#sg_star" transform="translate(31.53,14.85) scale(0.19)"/>
+                            <use xlink:href="#sg_star" transform="translate(24.47,14.85) scale(0.19)"/>
+                            <use xlink:href="#sg_star" transform="translate(22.29,8.15) scale(0.19)"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="text-white text-lg font-medium group-hover:text-white">APAC</div>
+            </button>
+        </div>
+    </div>
+
+    <style>
+        .modal-open {
+            opacity: 1 !important;
+        }
+
+        /* Loading Spinner Animation */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #CC785C;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading overlay animations */
+        #loadingOverlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #loadingOverlay.hidden {
+            opacity: 0;
+        }
+
+        /* PDF viewer blur effect */
+        .pdf-viewer-blur {
+            filter: blur(3px);
+            transition: filter 0.3s ease-in-out;
+        }
+
+        .pdf-viewer-normal {
+            filter: none;
+            transition: filter 0.3s ease-in-out;
+        }
+
+        /* Bank Deals Modal - Zen Minimalist */
+        #bankDealsModal {
+            transition: opacity 0.4s ease-out;
+        }
+
+        #bankDealsModal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #bankDealsModal .bg-white {
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+
+        .deal-item {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .deal-item:hover {
+            transform: translateX(4px);
+        }
+
+        /* Responsive adjustments for bank deals modal */
+        @media (max-width: 640px) {
+            #bankDealsModal .max-w-5xl {
+                max-width: 95%;
+                margin: 1rem;
+            }
+            
+            #bankDealsModal .px-8 {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+    </style>
+    <!-- PDF Preview Overlay -->
+    <div id="pdfPreviewOverlay" class="fixed inset-0 z-50 hidden">
+        <!-- Blurred Background -->
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-md"></div>
+
+        <!-- Content Row -->
+        <div class="relative h-full flex">
+            <!-- LEFT: Deck info + floating switch -->
+            <div class="w-1/2 flex items-center justify-center p-8 pdfOverlay-left">
+                <!-- Card wrapper becomes the positioned ancestor -->
+                <div class="relative w-80 h-96">
+                    <!-- TL;DR switch anchored to the card -->
+                    <button
+                    id="tldrSwitchBtn"
+                    class="hidden absolute -top-12 -left - 2 z-20 inline-flex items-center gap-2
+                            px-4 py-2 rounded-lg bg-[#FAF9F2]/95 text-anthropic-slate
+                            border border-anthropic-cloud-light shadow-anthropic
+                            hover:shadow-anthropic-hover transition-all text-sm font-medium backdrop-blur">
+                    </button>
+
+                    <div id="reportInfoCard" class="w-full h-full rounded-2xl shadow-2xl"></div>
+                </div>
+            </div>
+
+            <!-- RIGHT: PDF -->
+            <div class="w-1/2 flex items-center justify-center p-8 pdfOverlay-right">
+                <div class="w-full h-full bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <iframe id="pdfViewer" class="w-full h-full border-0" src=""></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Close Button -->
+        <button onclick="closePDFPreview()"
+                class="absolute top-8 right-8 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110">
+            <svg width="24" height="24" viewBox="0 0 24 24" class="text-gray-700">
+            <path d="M18 6 L6 18 M6 6 L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Loading Animation Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 z-60 hidden">
+        <!-- Blurred Background -->
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+        
+        <!-- Loading Content -->
+        <div class="relative h-full w-full flex items-center justify-center">
+            <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-anthropic-cloud-light">
+                <!-- Spinner -->
+                <div class="flex justify-center mb-4">
+                    <div class="loading-spinner"></div>
+                </div>
+                
+                <!-- Loading Text -->
+                <div class="text-center">
+                    <h3 class="text-lg font-medium text-anthropic-slate mb-2">Loading Report</h3>
+                    <p class="text-sm text-anthropic-cloud-dark">Preparing your sector brief...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Deals Modal -->
+    <div id="bankDealsModal" class="fixed inset-0 z-50 hidden">
+        <!-- Blurred Background -->
+        <div class="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+
+        <!-- Modal Content -->
+        <div class="relative h-full flex items-center justify-center p-4 md:p-8">
+            <div class="bg-white rounded-3xl shadow-sm w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-anthropic-cloud-light/30">
+                <!-- Header -->
+                <div class="flex items-center justify-between px-8 pt-10 pb-8">
+                    <div class="flex items-center space-x-5">
+                        <img id="bankDealsLogo" src="" alt="" class="h-8 w-auto object-contain opacity-80">
+                        <div>
+                            <h2 id="bankDealsName" class="text-xl font-light text-anthropic-slate tracking-wide"></h2>
+                            <p id="bankDealsCount" class="text-xs text-anthropic-cloud-medium mt-2 font-light tracking-wide"></p>
+                        </div>
+                    </div>
+                    <button onclick="closeBankDeals()" 
+                            class="w-8 h-8 bg-transparent hover:bg-anthropic-cloud-light/20 rounded-full flex items-center justify-center transition-all duration-300 hover:opacity-70">
+                        <svg width="20" height="20" viewBox="0 0 24 24" class="text-anthropic-cloud-medium">
+                            <path d="M18 6 L6 18 M6 6 L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Deals List -->
+                <div class="flex-1 overflow-y-auto px-8 pb-10">
+                    <div id="bankDealsList" class="space-y-6">
+                        <!-- Deals will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html> 
