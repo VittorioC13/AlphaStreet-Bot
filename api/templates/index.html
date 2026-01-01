@@ -440,20 +440,20 @@
 <body class="font-styrene antialiased overflow-x-hidden">
     
     <!-- Sticky Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 p-8 transition-all duration-500 ease-out bg-white/95 backdrop-blur-sm shadow-sm" id="stickyHeader">
+    <header class="fixed top-0 left-0 right-0 z-50 p-8 transition-all duration-500 ease-out" id="stickyHeader" style="background: linear-gradient(180deg, rgba(51, 75, 102, 0.8) 0%, rgba(51, 75, 102, 0.4) 100%); backdrop-filter: blur(10px);">
         <div class="flex justify-between items-center">
             <!-- Logo -->
-            <div class="text-3xl font-bold tracking-tight text-anthropic-slate uppercase transition-all duration-700 ease-out" id="headerText" style="position: relative;">
+            <div class="text-3xl font-bold tracking-tight text-white uppercase transition-all duration-700 ease-out" id="headerText" style="position: relative;">
                 <span id="fullText" class="transition-all duration-700 ease-out">AlphaStreet BOT</span>
                 <span id="shortText" class="absolute top-0 left-0 opacity-0 transition-all duration-700 ease-out text-4xl">T<sup class="text-lg relative -top-2">3</sup></span>
             </div>
 
             <!-- Auth Buttons -->
             <div class="flex items-center gap-4 flex-nowrap">
-                <button id="purchaseBtn" onclick="window.location.href='/login'" class="shrink-0 whitespace-nowrap border-2 border-anthropic-slate/40 text-anthropic-slate px-5 py-3 rounded-lg font-medium transition-all duration-200 hover:border-anthropic-slate hover:bg-anthropic-slate/10 text-base hidden h-12">
+                <button id="purchaseBtn" onclick="window.location.href='/login'" class="shrink-0 whitespace-nowrap border-2 border-white/60 text-white px-5 py-3 rounded-lg font-medium transition-all duration-200 hover:border-white hover:bg-white/20 text-base hidden h-12">
                 Unlock
                 </button>
-                <a href="/mission" class="shrink-0 whitespace-nowrap text-anthropic-slate px-4 py-3 font-light transition-all duration-200 hover:text-anthropic-slate/80 text-base">
+                <a href="/mission" class="shrink-0 whitespace-nowrap text-white px-4 py-3 font-light transition-all duration-200 hover:text-white/80 text-base">
                     Mission
                 </a>
             </div>
