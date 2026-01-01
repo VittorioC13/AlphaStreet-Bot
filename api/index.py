@@ -30,11 +30,10 @@ try:
 except:
     pass
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 API2D_BASE_URL = "https://oa.api2d.net"  # API2D endpoint
 if not OPENAI_API_KEY:
     raise RuntimeError("Missing OPENAI_API_KEY env var")
-    pass
 
 #
 # ---------- Primitive element classes ----------
@@ -51,21 +50,24 @@ class Underline:  text: str
 class BoldLine:   text: str
 
 
-MONGODB_URI="mongodb://tmtbot_user:123@124.221.89.25:27017/?authSource=tmtbot"
-MONGODB_STANDARD_URI="mongodb://user:pass@host1:27017,host2:27017,host3:27017/?replicaSet=atlas-XXXX-shard-0&authSource=admin&tls=true&retryWrites=true&w=majority"
+MONGODB_URI = os.environ.get("MONGODB_URI")
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "tmtbot")   # optional; defaults to "tmtbot" if not set
 WEBSEARCH_PREFIX = "$Perform Websearch$"
 
+if not MONGODB_URI:
+    raise RuntimeError("Missing MONGODB_URI environment variable. Add it to your .env or Vercel environment.")
+
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this-in-production'
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
 app.conversations = None
 app.messages = None
 
-if not MONGODB_URI:
-    raise RuntimeError("MONGODB_URI not set. Add it to your .env or environment.")
-
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://postgres.raxegckgsveacgflvwbd:wdsjkdmmhaq@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres')
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if not DATABASE_URL:
+    raise RuntimeError("Missing DATABASE_URL environment variable. Add it to your .env or Vercel environment.")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
