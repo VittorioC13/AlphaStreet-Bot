@@ -33,8 +33,8 @@ except:
 OPENAI_API_KEY = os.environ.get("OPENAI_API")
 API2D_BASE_URL = "https://oa.api2d.net"  # API2D endpoint
 if not OPENAI_API_KEY:
-    raise RuntimeError("Missing OPENAI_API_KEY env var")
-    pass
+    print("[WARNING] OPENAI_API not set. Chat features will not work.")
+    OPENAI_API_KEY = None
 
 #
 # ---------- Primitive element classes ----------
