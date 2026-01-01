@@ -30,10 +30,10 @@ try:
 except:
     pass
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 API2D_BASE_URL = "https://oa.api2d.net"  # API2D endpoint
 if not OPENAI_API_KEY:
-    print("[WARNING] OPENAI_API not set. Chat features will not work.")
+    print("[WARNING] OPENAI_API_KEY not set. Chat features will not work.")
     OPENAI_API_KEY = None
 
 #
