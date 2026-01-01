@@ -23,6 +23,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, DateField
 from wtforms.validators import DataRequired
 from typing import Optional
+import secrets
 
 # Try to load .env file, but don't fail if it doesn't exist (for Vercel deployment)
 try:
@@ -432,7 +433,7 @@ app.jinja_env.globals['check_type'] = check_type
 # Database Models
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
@@ -440,7 +441,9 @@ class User(db.Model, UserMixin):
     premium_expires_at = db.Column(db.DateTime, nullable=True)
     selected_sector = db.Column(db.String(10), nullable=True)  # 'TMT' or 'Energy'
     sector_changed_at = db.Column(db.DateTime, nullable=True)  # Track when sector was last changed
-    
+    session_token = db.Column(db.String(64), nullable=True)  # Single-session enforcement token
+    session_last_activity = db.Column(db.DateTime, nullable=True)  # Track session activity for timeout
+
     @property
     def has_valid_premium(self):
         """Check if user has valid premium access (basic/premium/max and not expired)"""
@@ -613,6 +616,49 @@ def get_available_reports():
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
+@app.before_request
+def enforce_single_session():
+    """
+    Enforce single-session per user.
+    If a user logs in from another location, this will invalidate the previous session.
+    """
+    # Skip session validation for certain routes
+    excluded_routes = ['login', 'logout', 'static', 'login_page', 'register_page', 'index']
+
+    # Skip if route is excluded or if it's an API login/logout
+    if request.endpoint in excluded_routes or request.path.startswith('/api/login') or request.path.startswith('/api/logout'):
+        return None
+
+    # Only check if user is authenticated
+    if current_user.is_authenticated:
+        try:
+            # Get the session token from Flask session
+            flask_session_token = session.get('session_token')
+
+            # Get the user from database to check their current session token
+            user = User.query.get(current_user.id)
+
+            # If tokens don't match, this session has been invalidated by a new login
+            if not flask_session_token or not user or flask_session_token != user.session_token:
+                # Clear the session and logout
+                logout_user()
+                session.clear()
+
+                # Redirect to login page with message
+                if request.path.startswith('/api/'):
+                    return jsonify({'authenticated': False, 'error': 'Session invalidated - another login detected'}), 401
+                else:
+                    flash('Your session has been ended because another login was detected on your account.', 'warning')
+                    return redirect(url_for('login_page'))
+            else:
+                # Session is valid - update last activity timestamp to keep session alive
+                user.session_last_activity = datetime.utcnow()
+                db.session.commit()
+        except Exception as e:
+            print(f"Session validation error: {e}")
+
+    return None
+
 @app.route('/')
 def index():
     """Main landing page"""
@@ -728,9 +774,33 @@ def login():
         
         try:
             user = User.query.filter_by(username=username).first()
-            
+
             if user and user.password == password:  # Assuming password is stored as plain text or hashed
+                # Check if user already has an active session (single-session enforcement)
+                SESSION_TIMEOUT_MINUTES = 5
+                if user.session_token is not None and user.session_last_activity:
+                    # Check if session has expired (5 minutes of inactivity)
+                    time_since_activity = datetime.utcnow() - user.session_last_activity
+                    if time_since_activity.total_seconds() < (SESSION_TIMEOUT_MINUTES * 60):
+                        # Session is still active - block login
+                        return jsonify({
+                            'success': False,
+                            'error': 'This account is already logged in from another location. Please log out first, or if you closed your browser without logging out, please wait 5 minutes and try again.'
+                        }), 403
+                    # Session expired - clear it and allow login below
+
+                # Generate new session token for single-session enforcement
+                new_session_token = secrets.token_urlsafe(32)
+
+                # Update user's session token and last activity in database
+                user.session_token = new_session_token
+                user.session_last_activity = datetime.utcnow()
+                db.session.commit()
+
+                # Login user and store session token in Flask session
                 login_user(user)
+                session['session_token'] = new_session_token
+
                 return jsonify({'success': True, 'redirect': '/dashboard'})
             else:
                 return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
@@ -744,6 +814,17 @@ def login():
 @app.route('/api/logout', methods=['GET', 'POST'])
 def logout():
     """Logout endpoint"""
+    # Clear session token and last activity from database if user is logged in
+    if current_user.is_authenticated:
+        try:
+            user = User.query.get(current_user.id)
+            if user:
+                user.session_token = None
+                user.session_last_activity = None
+                db.session.commit()
+        except Exception as e:
+            print(f"Logout error clearing session token: {e}")
+
     logout_user()
     session.clear()  # Clear all session data
     return redirect('/')
